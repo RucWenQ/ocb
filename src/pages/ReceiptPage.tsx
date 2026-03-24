@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ReceiptTable from '../components/ReceiptTable'
-import { controlItems, experimentalBanner, experimentalItems } from '../data/receiptData'
+import { receiptDataByCondition } from '../data/receiptData'
 import { useDataSubmit } from '../hooks/useDataSubmit'
 import { usePageTimer } from '../hooks/usePageTimer'
 import { useExperimentStore } from '../store/experimentStore'
@@ -19,7 +19,6 @@ export default function ReceiptPage() {
   const submitData = useDataSubmit()
   const condition = useExperimentStore((state) => state.condition ?? 'control')
   const aiNickname = useExperimentStore((state) => state.aiConfig.nickname || 'AI助理')
-  const participantId = useExperimentStore((state) => state.participantId || '未命名')
   const setCurrentPage = useExperimentStore((state) => state.setCurrentPage)
   const setReceiptInfo = useExperimentStore((state) => state.setReceiptInfo)
 
@@ -31,8 +30,7 @@ export default function ReceiptPage() {
   const [canConfirm, setCanConfirm] = useState(false)
   const scrollerRef = useRef<HTMLDivElement | null>(null)
 
-  const items = condition === 'experimental' ? experimentalItems : controlItems
-  const total = condition === 'experimental' ? 414 : 332
+  const receiptData = receiptDataByCondition[condition]
 
   const evaluateConfirmState = useCallback(() => {
     const node = scrollerRef.current
@@ -70,7 +68,8 @@ export default function ReceiptPage() {
       condition,
       receiptNo,
       duration,
-      total,
+      total: receiptData.total,
+      remaining: receiptData.remaining,
     })
 
     setToast('采买已确认，正在生成记录...')
@@ -86,14 +85,14 @@ export default function ReceiptPage() {
       <p className="mt-1 text-xs text-slate-500">
         回执编号：{receiptNo} | 采买日期：{currentDate}
       </p>
-
-      <div className="mt-2 text-sm text-slate-600">
-        采买人：{aiNickname}（代 {participantId}）
+      <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-600">
+        <p>采购人：{aiNickname}</p>
+        <p>采购单位：行政部</p>
       </div>
 
-      {condition === 'experimental' && (
-        <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          {experimentalBanner}
+      {condition === 'experimental' && receiptData.banner && (
+        <div className="mt-4 rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-emerald-100 to-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {receiptData.banner}
         </div>
       )}
 
@@ -102,13 +101,18 @@ export default function ReceiptPage() {
         onScroll={handleScroll}
         className="thin-scrollbar mt-4 max-h-[min(60vh,34rem)] overflow-y-auto rounded-xl border border-slate-200 p-3 [touch-action:pan-y]"
       >
-        <ReceiptTable items={items} />
-        <p className="mt-3 text-right text-base font-semibold text-slate-900">总计：{total}元</p>
-        <p className="mt-2 text-sm text-slate-600">
-          {condition === 'experimental'
-            ? 'AI助理优先为您筛选了具有环保认证的办公用品，在满足会议需求的同时减少环境影响。'
-            : 'AI助理已根据会议需求为您完成物资采买。'}
-        </p>
+        <ReceiptTable items={receiptData.items} showEcoColumn={condition === 'experimental'} />
+        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
+          <p className="flex items-center justify-between font-semibold text-slate-900">
+            <span>总计</span>
+            <span>¥{receiptData.total.toLocaleString('zh-CN')}</span>
+          </p>
+          <p className="mt-2 flex items-center justify-between text-slate-700">
+            <span>预算剩余</span>
+            <span>¥{receiptData.remaining.toLocaleString('zh-CN')}</span>
+          </p>
+        </div>
+        <p className="mt-3 text-sm text-slate-600">{receiptData.footnote}</p>
       </div>
 
       {!canConfirm && <p className="mt-3 text-xs text-amber-600">请滚动查看完整回执后再确认采买。</p>}

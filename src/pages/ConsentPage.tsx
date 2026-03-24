@@ -85,8 +85,10 @@ export default function ConsentPage() {
 
   return (
     <section className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <h1 className="text-2xl font-semibold text-slate-900">欢迎参加线上心理学实验</h1>
-      <p className="mt-2 text-sm text-slate-600">请先完成知情同意和基本信息填写后开始实验。</p>
+      <h1 className="text-2xl font-semibold text-slate-900">研究参与知情同意书</h1>
+      <p className="mt-2 text-sm text-slate-600">
+        请先阅读并同意以下说明。你可在任意时点退出实验，所有数据仅用于学术研究。
+      </p>
 
       <div className="mt-5 rounded-xl border border-slate-200">
         <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
@@ -111,13 +113,14 @@ export default function ConsentPage() {
               disabled={!hasReadToBottom}
               onChange={(event) => setConsentGiven(event.target.checked)}
             />
-            我已阅读并同意参与本研究
+            我同意参与本研究
           </label>
           {!hasReadToBottom && <p className="mt-2 text-xs text-amber-600">请先滚动阅读到知情同意书底部。</p>}
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+        <h2 className="text-base font-semibold text-slate-900">基本信息</h2>
         <div>
           <p className="mb-2 text-sm font-medium text-slate-700">性别</p>
           <div className="flex flex-wrap gap-4 text-sm text-slate-700">
@@ -211,7 +214,7 @@ export default function ConsentPage() {
           disabled={!isFormComplete}
           className="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
-          开始实验
+          开始实验 →
         </button>
       </form>
     </section>

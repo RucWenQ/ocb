@@ -60,7 +60,9 @@ export default function AIEditorPage() {
     <section className="grid gap-5 lg:grid-cols-5">
       <form onSubmit={handleSubmit} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm lg:col-span-3">
         <h1 className="text-2xl font-semibold text-slate-900">创建你的AI助理</h1>
-        <p className="mt-2 text-sm text-slate-600">头像与昵称为必填，其余参数可按偏好调整。</p>
+        <p className="mt-2 text-sm text-slate-600">
+          请设置你的AI助理。你可以自定义它的名称、头像和工作风格，设置完成后将用它来协助完成采购任务。
+        </p>
 
         <div className="mt-5 space-y-6">
           <div>
@@ -158,7 +160,7 @@ export default function AIEditorPage() {
           disabled={!canSubmit}
           className="mt-6 w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
         >
-          完成设置，开始对话 →
+          设置完成，开始对话 →
         </button>
       </form>
 

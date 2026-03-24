@@ -2,6 +2,7 @@ export const SCALE_SEQUENCE = ['peb', 'ocb'] as const
 export type ScaleId = (typeof SCALE_SEQUENCE)[number]
 
 export const TOTAL_PAGES = 8
+export const TOTAL_STEPS = 6
 
 const pageRouteMap: Record<number, string> = {
   1: '/consent',
@@ -16,13 +17,22 @@ const pageRouteMap: Record<number, string> = {
 
 const pageLabelMap: Record<number, string> = {
   1: '知情同意',
-  2: '背景说明',
-  3: 'AI助理设置',
-  4: 'AI对话',
-  5: '采买回执',
-  6: '量表作答 1/2',
-  7: '量表作答 2/2',
+ 2: '情境阅读',
+ 3: '设置AI助理',
+ 4: 'AI协助采购',
+ 5: '确认回执',
+ 6: '问卷',
+ 7: '问卷',
   8: '实验结束',
+}
+
+const stepLabelMap: Record<number, string> = {
+  1: '知情同意',
+  2: '情境阅读',
+  3: '设置AI助理',
+  4: 'AI协助采购',
+  5: '确认回执',
+  6: '问卷',
 }
 
 export function pathForPage(page: number): string {
@@ -43,6 +53,19 @@ export function pageForPath(pathname: string): number | null {
   if (pathname === '/measure/ocb') return 7
   if (pathname === '/debrief') return 8
   return null
+}
+
+export function stepForPage(page: number): number {
+  if (page <= 1) return 1
+  if (page === 2) return 2
+  if (page === 3) return 3
+  if (page === 4) return 4
+  if (page === 5) return 5
+  return 6
+}
+
+export function stepLabelForPage(page: number): string {
+  return stepLabelMap[stepForPage(page)] ?? '实验流程'
 }
 
 export function nextScaleId(scaleId: string): ScaleId | null {

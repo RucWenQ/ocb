@@ -10,8 +10,8 @@ html {
   font-family:
     'Source Han Sans CN', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei',
     system-ui, -apple-system, sans-serif;
-  color: #0f172a;
-  background-color: #f8fafc;
+  color: #1e293b;
+  background-color: #f1f5f9;
 }
 
 * {
@@ -23,10 +23,7 @@ body {
   min-height: 100vh;
   font-size: 1rem;
   line-height: 1.6;
-  background:
-    radial-gradient(circle at top right, #dbeafe 0%, rgba(219, 234, 254, 0) 45%),
-    radial-gradient(circle at top left, #f1f5f9 0%, rgba(241, 245, 249, 0) 35%),
-    #f8fafc;
+  background-color: #f1f5f9;
 }
 
 em,

@@ -7,11 +7,11 @@ export default {
         brand: {
           50: '#eff6ff',
           100: '#dbeafe',
-          600: '#2563eb',
-          700: '#1d4ed8',
+          600: '#3b82f6',
+          700: '#2563eb',
         },
-        accent: '#16a34a',
-        surface: '#f8fafc',
+        accent: '#1e293b',
+        surface: '#f1f5f9',
       },
       boxShadow: {
         soft: '0 10px 30px -12px rgba(37, 99, 235, 0.35)',
