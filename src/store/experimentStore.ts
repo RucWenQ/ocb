@@ -34,6 +34,7 @@ interface ExperimentState {
 }
 
 const defaultDemographics: Demographics = {
+  phone: '',
   gender: '',
   age: null,
   education: '',

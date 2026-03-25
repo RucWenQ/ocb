@@ -4,28 +4,29 @@ export interface QwenMessage {
 }
 
 interface StreamOptions {
-  model?: 'qwen-turbo' | 'qwen-plus' | 'qwen-max'
+  model?: string
   temperature?: number
   maxTokens?: number
   onDelta: (chunk: string) => void
 }
 
-const ENDPOINT = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'
+const DEFAULT_ENDPOINT = 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'
 
 export async function streamQwenChat(messages: QwenMessage[], options: StreamOptions): Promise<string> {
   const apiKey = import.meta.env.VITE_QWEN_API_KEY as string | undefined
+  const endpoint = (import.meta.env.VITE_QWEN_API_ENDPOINT as string | undefined) ?? DEFAULT_ENDPOINT
   if (!apiKey) {
     throw new Error('VITE_QWEN_API_KEY is missing')
   }
 
-  const response = await fetch(ENDPOINT, {
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: options.model ?? 'qwen-plus',
+      model: options.model ?? (import.meta.env.VITE_QWEN_MODEL as string | undefined) ?? 'qwen-plus',
       messages,
       stream: true,
       temperature: options.temperature ?? 0.7,

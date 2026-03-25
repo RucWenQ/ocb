@@ -2,10 +2,17 @@ interface ChatBubbleProps {
   role: 'system' | 'user' | 'assistant'
   content: string
   avatar?: string
+  assistantName?: string
   asCard?: boolean
 }
 
-export default function ChatBubble({ role, content, avatar = '🤖', asCard = false }: ChatBubbleProps) {
+export default function ChatBubble({
+  role,
+  content,
+  avatar = '🤖',
+  assistantName = 'AI助理',
+  asCard = false,
+}: ChatBubbleProps) {
   if (role === 'system') {
     return <p className="text-center text-xs text-slate-500">{content}</p>
   }
@@ -15,7 +22,10 @@ export default function ChatBubble({ role, content, avatar = '🤖', asCard = fa
   return (
     <div className={`flex items-end gap-2 ${assistant ? 'justify-start' : 'justify-end'}`}>
       {assistant && (
-        <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-brand-100 text-sm">{avatar}</div>
+        <div className="w-12 shrink-0 text-center">
+          <div className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-brand-100 text-sm">{avatar}</div>
+          <p className="mt-1 truncate text-[10px] leading-tight text-slate-500">{assistantName}</p>
+        </div>
       )}
 
       <div

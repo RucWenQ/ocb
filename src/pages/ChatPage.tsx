@@ -1,63 +1,109 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { AVATAR_OPTIONS } from '../components/AvatarGrid'
-import ChatBubble from '../components/ChatBubble'
-import ChatInput from '../components/ChatInput'
-import { departmentNeeds, purchaseBrief, purchaseSummaryCardMessage } from '../data/purchaseBrief'
-import { useDataSubmit } from '../hooks/useDataSubmit'
-import { usePageTimer } from '../hooks/usePageTimer'
-import { useExperimentStore } from '../store/experimentStore'
-import { streamQwenChat, type QwenMessage } from '../services/qwenApi'
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AVATAR_OPTIONS } from "../components/AvatarGrid";
+import ChatBubble from "../components/ChatBubble";
+import ChatInput from "../components/ChatInput";
+import { departmentNeeds, purchaseBrief } from "../data/purchaseBrief";
+import { useDataSubmit } from "../hooks/useDataSubmit";
+import { usePageTimer } from "../hooks/usePageTimer";
+import { useExperimentStore } from "../store/experimentStore";
+import { streamQwenChat, type QwenMessage } from "../services/qwenApi";
 
 interface RenderMessage {
-  id: string
-  role: 'system' | 'user' | 'assistant'
-  content: string
-  asCard?: boolean
+  id: string;
+  role: "system" | "user" | "assistant";
+  content: string;
+  asCard?: boolean;
 }
 
-const COMPLETE_TEXT = '采买已完成！请点击下方按钮查看详细回执。'
-const PRESET_FINAL_TEXT = '采购方案已经准备好了，请点击下方按钮查看详细回执~'
-
-function greetingByStyle(style: 'professional' | 'friendly' | 'concise', nickname: string) {
-  if (style === 'friendly') {
-    return `你好呀！我是${nickname}，已准备好协助你处理月末采购任务。请发送采购需求汇总给我～`
-  }
-  if (style === 'concise') {
-    return `你好，我是${nickname}。请发送采购需求汇总，我将立即处理。`
-  }
-  return `你好！我是${nickname}，已经准备就绪。请把采购需求汇总发给我，我来帮你处理。`
+interface RequirementCard {
+  id: string;
+  title: string;
+  lines: string[];
+  sendText: string;
+  toneClass: string;
 }
 
 function fallbackReply(userTurns: number): string {
   if (userTurns <= 1) {
-    return '我已收到全部采购需求，会先按部门与会议物资分类整理，再在预算内分配采购优先级。'
+    return "已收到这部分需求，我会先登记并与预算约束一起核对。";
   }
   if (userTurns <= 3) {
-    return '我正在完成比价与预算核对，确保各项需求都被覆盖。'
+    return "我已继续整合你发送的需求，正在按优先级和预算做采购安排。";
   }
-  return PRESET_FINAL_TEXT
+  return "好的，我会继续根据你后续发送的需求动态更新采购方案。";
 }
 
-function styleDescription(style: 'professional' | 'friendly' | 'concise'): string {
-  if (style === 'friendly') return '亲切随和'
-  if (style === 'concise') return '简洁高效'
-  return '专业严谨'
+function styleDescription(
+  style: "professional" | "friendly" | "concise",
+): string {
+  if (style === "friendly") return "亲切随和";
+  if (style === "concise") return "简洁高效";
+  return "专业严谨";
+}
+
+function temperatureFromCreativity(creativity: number): number {
+  return Number((0.2 + (creativity / 100) * 0.8).toFixed(2));
+}
+
+function maxTokensFromDetail(detailLevel: number): number {
+  return 220 + Math.round(detailLevel * 4);
 }
 
 export default function ChatPage() {
-  usePageTimer('chat')
+  usePageTimer("chat");
 
-  const navigate = useNavigate()
-  const submitData = useDataSubmit()
-  const aiConfig = useExperimentStore((state) => state.aiConfig)
-  const chatHistory = useExperimentStore((state) => state.chatHistory)
-  const appendChatMessage = useExperimentStore((state) => state.appendChatMessage)
-  const setCurrentPage = useExperimentStore((state) => state.setCurrentPage)
+  const navigate = useNavigate();
+  const submitData = useDataSubmit();
+  const aiConfig = useExperimentStore((state) => state.aiConfig);
+  const chatHistory = useExperimentStore((state) => state.chatHistory);
+  const appendChatMessage = useExperimentStore(
+    (state) => state.appendChatMessage,
+  );
+  const setCurrentPage = useExperimentStore((state) => state.setCurrentPage);
 
   const avatarEmoji = useMemo(() => {
-    return AVATAR_OPTIONS.find((item) => item.id === aiConfig.avatarId)?.emoji ?? '🤖'
-  }, [aiConfig.avatarId])
+    return (
+      AVATAR_OPTIONS.find((item) => item.id === aiConfig.avatarId)?.emoji ??
+      "🤖"
+    );
+  }, [aiConfig.avatarId]);
+  const assistantName = aiConfig.nickname || "AI助理";
+
+  const requirementCards = useMemo<RequirementCard[]>(() => {
+    const departmentCards = departmentNeeds.map((dept) => ({
+      id: dept.id,
+      title: `${dept.name}（${dept.headcount}人）`,
+      lines: dept.items,
+      sendText: `${dept.name}需求（${dept.headcount}人）：\n${dept.items.map((item) => `- ${item}`).join("\n")}`,
+      toneClass: "border-slate-200 bg-white",
+    }));
+
+    const meetingCard: RequirementCard = {
+      id: "meeting",
+      title: "月度例会需求",
+      lines: [
+        `会议时间：${purchaseBrief.meetingTime}`,
+        `参会人数：${purchaseBrief.participants}`,
+        `会议地点：${purchaseBrief.room}`,
+        `需准备：${purchaseBrief.meetingNeeds.join("、")}等`,
+      ],
+      sendText: `月度例会信息：\n- 会议时间：${purchaseBrief.meetingTime}\n- 参会人数：${purchaseBrief.participants}\n- 会议地点：${purchaseBrief.room}\n- 需准备：${purchaseBrief.meetingNeeds.join("、")}等`,
+      toneClass: "border-blue-200 bg-blue-50",
+    };
+
+    const budgetCard: RequirementCard = {
+      id: "budget",
+      title: "整体预算",
+      lines: [
+        `本月行政部剩余预算：¥${purchaseBrief.budget.toLocaleString("zh-CN")}`,
+      ],
+      sendText: `整体预算要求：本月行政部剩余预算为 ¥${purchaseBrief.budget.toLocaleString("zh-CN")}，请在预算内完成全部采购。`,
+      toneClass: "border-brand-200 bg-brand-50",
+    };
+
+    return [...departmentCards, meetingCard, budgetCard];
+  }, []);
 
   const initialMessages: RenderMessage[] =
     chatHistory.length > 0
@@ -66,146 +112,164 @@ export default function ChatPage() {
           role: msg.role,
           content: msg.content,
         }))
-      : [{ id: 'system-start', role: 'system', content: '对话已开始' }]
+      : [{ id: "system-start", role: "system", content: "对话已开始" }];
 
-  const [messages, setMessages] = useState<RenderMessage[]>(initialMessages)
-  const [inputText, setInputText] = useState('')
-  const [typing, setTyping] = useState(false)
-  const [drawerOpen, setDrawerOpen] = useState(false)
-  const [summarySent, setSummarySent] = useState(initialMessages.some((item) => item.content.includes('月末综合采购需求')))
-  const [userTurns, setUserTurns] = useState(chatHistory.filter((item) => item.role === 'user').length)
-  const [conversationEnded, setConversationEnded] = useState(
-    chatHistory.some((item) => item.content.includes('查看详细回执')),
-  )
-  const listRef = useRef<HTMLDivElement | null>(null)
+  const [messages, setMessages] = useState<RenderMessage[]>(initialMessages);
+  const [inputText, setInputText] = useState("");
+  const [typing, setTyping] = useState(false);
+  const [sentCardIds, setSentCardIds] = useState<string[]>([]);
+  const listRef = useRef<HTMLDivElement | null>(null);
+
+  const userTurns = useMemo(
+    () => messages.filter((item) => item.role === "user").length,
+    [messages],
+  );
 
   useEffect(() => {
-    if (chatHistory.length > 0) return
+    const userMessages = chatHistory
+      .filter((item) => item.role === "user")
+      .map((item) => item.content.trim());
+    const sentIds = requirementCards
+      .filter((card) => userMessages.includes(card.sendText.trim()))
+      .map((card) => card.id);
+    setSentCardIds(sentIds);
+  }, [chatHistory, requirementCards]);
+
+  useEffect(() => {
+    if (chatHistory.length > 0) return;
     const timer = window.setTimeout(() => {
-      const welcome = greetingByStyle(aiConfig.personality, aiConfig.nickname || '你的AI助理')
+      const welcome = `你好，我是${assistantName}，是你的AI助理，你可以将工作内容发送给我，交由我来处理。`;
       const assistantMessage: RenderMessage = {
         id: `assistant-${Date.now()}`,
-        role: 'assistant',
+        role: "assistant",
         content: welcome,
-      }
-      setMessages((prev) => [...prev, assistantMessage])
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
       appendChatMessage({
-        role: 'assistant',
+        role: "assistant",
         content: welcome,
         timestamp: new Date().toISOString(),
-      })
-    }, 1000)
+      });
+    }, 800);
 
-    return () => window.clearTimeout(timer)
-  }, [aiConfig.nickname, aiConfig.personality, appendChatMessage, chatHistory.length])
+    return () => window.clearTimeout(timer);
+  }, [assistantName, appendChatMessage, chatHistory.length]);
 
   useEffect(() => {
-    const list = listRef.current
-    if (!list) return
-    list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' })
-  }, [messages, typing])
+    const list = listRef.current;
+    if (!list) return;
+    list.scrollTo({ top: list.scrollHeight, behavior: "smooth" });
+  }, [messages, typing]);
 
   const askAssistant = async (
-    nextUserTurns: number,
-    userMessage: string,
+    conversationMessages: QwenMessage[],
     onDelta: (delta: string) => void,
   ): Promise<string> => {
-    const systemPrompt = `你是一个企业AI办公助理，名叫"${aiConfig.nickname || '助理'}"。你的沟通风格是${styleDescription(
+    const departmentContext = departmentNeeds
+      .map(
+        (dept) =>
+          `- ${dept.name}（${dept.headcount}人）：${dept.items.join("；")}`,
+      )
+      .join("\n");
+    const detailInstruction =
+      aiConfig.detailLevel >= 70
+        ? "回复可更详细，给出清晰分项与理由。"
+        : aiConfig.detailLevel <= 30
+          ? "回复保持简洁，优先给出关键结论。"
+          : "回复保持中等详细度，兼顾完整和可读性。";
+    const creativityInstruction =
+      aiConfig.creativity >= 70
+        ? "允许提出更灵活的采购组织思路，但不得突破预算。"
+        : aiConfig.creativity <= 30
+          ? "优先稳妥、常规的采购安排。"
+          : "在稳妥基础上给出适度优化建议。";
+    const customInstruction = aiConfig.customPrompt.trim()
+      ? `\n用户补充偏好：${aiConfig.customPrompt.trim()}`
+      : "";
+
+    const systemPrompt = `你是企业采购沟通助理，昵称为“${aiConfig.nickname || "助理"}”，沟通风格为${styleDescription(
       aiConfig.personality,
     )}。
 
-你目前正在帮助用户（智行科技的行政专员）完成月末综合物资采购任务。任务包括：
-1. 处理来自产品研发部、市场营销部、财务部、人力资源部的办公耗材补充需求
-2. 采购下周五月度例会（约35人）的会议物资
-3. 总预算为2500元
+任务背景（与用户 briefing 一致）：
+1) 部门办公耗材需求
+${departmentContext}
+2) 月度例会信息：时间 ${purchaseBrief.meetingTime}；参会 ${purchaseBrief.participants}；地点 ${purchaseBrief.room}；物资 ${purchaseBrief.meetingNeeds.join(
+      "、",
+    )}。
+3) 总预算：¥${purchaseBrief.budget.toLocaleString("zh-CN")}。
 
-你的工作流程：
-- 第一轮：收到用户发送的需求汇总后，确认你已收到并理解所有需求，简要说明采购思路，并询问是否有特别偏好
-- 第二轮：根据用户反馈，表示你已经开始整理采购清单并进行比价
-- 第三轮：告知用户采购方案已生成，请用户查看回执
-
-重要规则：
-- 不要在对话中提及具体购买品牌或产品，不要提及环保、绿色、可持续等词汇
-- 在2-3轮交互内自然收束，引导用户查看回执
-- 保持${styleDescription(aiConfig.personality)}风格
-- 每次回复不超过150字
-- 不要主动询问超过1个问题`
-
-    const conversationMessages: QwenMessage[] = messages
-      .filter((msg) => msg.role === 'assistant' || msg.role === 'user')
-      .map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      }))
-
-    const qwenMessages: QwenMessage[] = [{ role: 'system', content: systemPrompt }, ...conversationMessages]
-    if (nextUserTurns === 3) {
-      qwenMessages.push({
-        role: 'system',
-        content: '请在本轮回复中自然地结束对话，告知用户采购方案已生成，请查看回执。',
-      })
-    }
-    qwenMessages.push({ role: 'user', content: userMessage })
+交互规则：
+- 用户会按任意顺序逐条发送需求卡，你要逐条确认并累计理解，不要要求固定轮数。
+- 仅基于用户已发送的信息回复；若信息仍不完整，提醒用户继续发送右侧需求卡。
+- 不能推荐具体品牌或型号。
+- 始终做预算意识提示，避免超预算。
+- ${detailInstruction}
+- ${creativityInstruction}${customInstruction}`;
 
     try {
-      const text = await streamQwenChat(qwenMessages, {
-        model: 'qwen-plus',
-        temperature: 0.7,
-        maxTokens: 500,
-        onDelta,
-      })
-      if (text) return text
+      const text = await streamQwenChat(
+        [{ role: "system", content: systemPrompt }, ...conversationMessages],
+        {
+          model:
+            (import.meta.env.VITE_QWEN_MODEL as string | undefined) ??
+            "qwen-plus",
+          temperature: temperatureFromCreativity(aiConfig.creativity),
+          maxTokens: maxTokensFromDetail(aiConfig.detailLevel),
+          onDelta,
+        },
+      );
+      if (text) return text;
     } catch {
-      return fallbackReply(nextUserTurns)
+      const turns = conversationMessages.filter(
+        (item) => item.role === "user",
+      ).length;
+      return fallbackReply(turns);
     }
 
-    return fallbackReply(nextUserTurns)
-  }
+    const turns = conversationMessages.filter(
+      (item) => item.role === "user",
+    ).length;
+    return fallbackReply(turns);
+  };
 
   const sendUserMessage = async (message: string, asCard = false) => {
-    const text = message.trim()
-    if (!text || typing || conversationEnded) return
-    const nextUserTurns = userTurns + 1
-    if (nextUserTurns > 4) return
+    const text = message.trim();
+    if (!text || typing) return;
 
     const userEntry: RenderMessage = {
       id: `user-${Date.now()}`,
-      role: 'user',
+      role: "user",
       content: text,
       asCard,
-    }
-    setMessages((prev) => [...prev, userEntry])
+    };
+    setMessages((prev) => [...prev, userEntry]);
     appendChatMessage({
-      role: 'user',
+      role: "user",
       content: text,
       timestamp: new Date().toISOString(),
-    })
+    });
 
-    setUserTurns(nextUserTurns)
+    const conversationForApi: QwenMessage[] = [
+      ...messages
+        .filter((msg) => msg.role === "assistant" || msg.role === "user")
+        .map((msg) => ({
+          role: msg.role,
+          content: msg.content,
+        })),
+      { role: "user", content: text },
+    ];
 
-    if (nextUserTurns === 4) {
-      const forcedEntry: RenderMessage = {
-        id: `assistant-force-${Date.now()}`,
-        role: 'assistant',
-        content: PRESET_FINAL_TEXT,
-      }
-      setMessages((prev) => [...prev, forcedEntry])
-      appendChatMessage({
-        role: 'assistant',
-        content: PRESET_FINAL_TEXT,
-        timestamp: new Date().toISOString(),
-      })
-      setConversationEnded(true)
-      return
-    }
+    const assistantTempId = `assistant-temp-${Date.now()}`;
+    setMessages((prev) => [
+      ...prev,
+      { id: assistantTempId, role: "assistant", content: "" },
+    ]);
 
-    const assistantTempId = `assistant-temp-${Date.now()}`
-    setMessages((prev) => [...prev, { id: assistantTempId, role: 'assistant', content: '' }])
-
-    setTyping(true)
-    let streamed = ''
-    const reply = await askAssistant(nextUserTurns, text, (delta) => {
-      streamed += delta
+    setTyping(true);
+    let streamed = "";
+    const reply = await askAssistant(conversationForApi, (delta) => {
+      streamed += delta;
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantTempId
@@ -215,11 +279,15 @@ export default function ChatPage() {
               }
             : msg,
         ),
-      )
-    })
-    setTyping(false)
+      );
+    });
+    setTyping(false);
 
-    const normalizedReply = (reply || streamed || fallbackReply(nextUserTurns)).trim()
+    const normalizedReply = (
+      reply ||
+      streamed ||
+      fallbackReply(userTurns + 1)
+    ).trim();
     setMessages((prev) =>
       prev.map((msg) =>
         msg.id === assistantTempId
@@ -229,158 +297,134 @@ export default function ChatPage() {
             }
           : msg,
       ),
-    )
+    );
     appendChatMessage({
-      role: 'assistant',
+      role: "assistant",
       content: normalizedReply,
       timestamp: new Date().toISOString(),
-    })
-
-    const shouldEnd =
-      nextUserTurns >= 3 ||
-      normalizedReply.includes('查看回执') ||
-      normalizedReply.includes('采购方案已生成') ||
-      normalizedReply.includes('查看详细回执')
-    if (shouldEnd) {
-      if (!normalizedReply.includes('回执')) {
-        const finalEntry: RenderMessage = { id: `assistant-final-${Date.now()}`, role: 'assistant', content: COMPLETE_TEXT }
-        setMessages((prev) => [...prev, finalEntry])
-        appendChatMessage({ role: 'assistant', content: COMPLETE_TEXT, timestamp: new Date().toISOString() })
-      }
-      setConversationEnded(true)
-    }
-  }
+    });
+  };
 
   const handleSend = async () => {
-    const text = inputText
-    setInputText('')
-    await sendUserMessage(text)
-  }
+    const text = inputText;
+    setInputText("");
+    await sendUserMessage(text);
+  };
 
-  const handleSendSummary = async () => {
-    setSummarySent(true)
-    await sendUserMessage(purchaseSummaryCardMessage, true)
-  }
+  const handleSendCard = async (card: RequirementCard) => {
+    if (typing || sentCardIds.includes(card.id)) return;
+    setSentCardIds((prev) => [...prev, card.id]);
+    await sendUserMessage(card.sendText, true);
+  };
 
   const handleToReceipt = async () => {
-    await submitData('chat', {
+    await submitData("chat", {
       userTurns,
-      ended: conversationEnded,
-      messages: messages.filter((msg) => msg.role !== 'system'),
-    })
-    setCurrentPage(5)
-    navigate('/receipt')
-  }
+      endedByUser: true,
+      messages: messages.filter((msg) => msg.role !== "system"),
+    });
+    setCurrentPage(5);
+    navigate("/receipt");
+  };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-        <div className="flex items-center gap-3">
-          <div className="grid h-10 w-10 place-items-center rounded-full bg-brand-100 text-xl">{avatarEmoji}</div>
-          <div>
-            <p className="text-sm font-semibold text-slate-900">{aiConfig.nickname || 'AI助理'}</p>
-            <p className="text-xs text-emerald-600">● 在线</p>
-          </div>
-        </div>
-        <button
-          type="button"
-          onClick={() => setDrawerOpen((prev) => !prev)}
-          className="rounded-lg border border-slate-200 px-3 py-1 text-xs text-slate-600 hover:bg-slate-50"
-        >
-          查看采购需求
-        </button>
-      </div>
-
-      <div ref={listRef} className="thin-scrollbar h-[55vh] space-y-3 overflow-y-auto bg-slate-50 px-3 py-4 sm:px-4">
-        {messages.map((message) => (
-          <ChatBubble
-            key={message.id}
-            role={message.role}
-            content={message.content}
-            avatar={avatarEmoji}
-            asCard={message.asCard}
-          />
-        ))}
-
-        {typing && (
-          <div className="flex items-center gap-2">
-            <div className="grid h-8 w-8 place-items-center rounded-full bg-brand-100 text-sm">{avatarEmoji}</div>
-            <div className="rounded-2xl rounded-bl-md bg-white px-3 py-2 shadow-sm">
-              <div className="flex gap-1">
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.2s]" />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.1s]" />
-                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
-              </div>
+    <section className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 place-items-center rounded-full bg-brand-100 text-xl">
+              {avatarEmoji}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-900">
+                {assistantName}
+              </p>
+              <p className="text-xs text-emerald-600">● 在线</p>
             </div>
           </div>
-        )}
-      </div>
+        </div>
 
-      <div className="space-y-3 border-t border-slate-200 p-3 sm:p-4">
-        {!summarySent && (
-          <button
-            type="button"
-            onClick={handleSendSummary}
-            className="w-full rounded-xl border border-brand-200 bg-brand-50 px-4 py-2 text-sm text-brand-700 transition hover:bg-brand-100"
-          >
-            📋 发送采购需求汇总
-          </button>
-        )}
+        <div
+          ref={listRef}
+          className="thin-scrollbar h-[55vh] space-y-3 overflow-y-auto bg-slate-50 px-3 py-4 sm:px-4"
+        >
+          {messages.map((message) => (
+            <ChatBubble
+              key={message.id}
+              role={message.role}
+              content={message.content}
+              avatar={avatarEmoji}
+              assistantName={assistantName}
+              asCard={message.asCard}
+            />
+          ))}
 
-        <ChatInput
-          value={inputText}
-          disabled={conversationEnded}
-          loading={typing}
-          onChange={setInputText}
-          onSend={handleSend}
-        />
+          {typing && (
+            <div className="flex items-center gap-2">
+              <div className="grid h-8 w-8 place-items-center rounded-full bg-brand-100 text-sm">
+                {avatarEmoji}
+              </div>
+              <div className="rounded-2xl rounded-bl-md bg-white px-3 py-2 shadow-sm">
+                <div className="flex gap-1">
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.2s]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.1s]" />
+                  <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
 
-        {conversationEnded && (
+        <div className="space-y-3 border-t border-slate-200 p-3 sm:p-4">
+          <ChatInput
+            value={inputText}
+            loading={typing}
+            onChange={setInputText}
+            onSend={handleSend}
+          />
+
           <button
             type="button"
             onClick={handleToReceipt}
-            className="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-brand-700"
+            disabled={typing || userTurns === 0}
+            className="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
-            📄 查看采买回执 →
+            查看采买回执 →
           </button>
-        )}
+        </div>
       </div>
 
-      {drawerOpen && (
-        <aside className="fixed inset-y-0 right-0 z-40 w-80 border-l border-slate-200 bg-white p-4 shadow-xl">
-          <div className="flex items-center justify-between">
-            <h2 className="text-base font-semibold text-slate-900">采购需求</h2>
-            <button
-              type="button"
-              onClick={() => setDrawerOpen(false)}
-              className="rounded-lg border border-slate-200 px-2 py-1 text-xs text-slate-600"
+      <aside className="space-y-3 rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+        <div className="rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600">
+          你可以按任意顺序将右侧汇总的采购信息点击“发送到对话”。
+        </div>
+
+        <div className="thin-scrollbar max-h-[68vh] space-y-3 overflow-y-auto pr-1">
+          {requirementCards.map((card) => (
+            <article
+              key={card.id}
+              className={`rounded-xl border p-3 ${card.toneClass}`}
             >
-              关闭
-            </button>
-          </div>
-          <div className="thin-scrollbar mt-4 max-h-[calc(100vh-6rem)] space-y-3 overflow-y-auto text-sm text-slate-700">
-            {departmentNeeds.map((dept) => (
-              <div key={dept.id} className="rounded-lg border border-slate-200 p-3">
-                <p className="font-medium text-slate-800">
-                  {dept.name}（{dept.headcount}人）
-                </p>
-                <ul className="mt-2 list-disc space-y-1 pl-5">
-                  {dept.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-              <p>会议时间：{purchaseBrief.meetingTime}</p>
-              <p>参会人数：{purchaseBrief.participants}</p>
-              <p>会议地点：{purchaseBrief.room}</p>
-              <p>会议需求：{purchaseBrief.meetingNeeds.join('、')}</p>
-              <p className="mt-1 font-medium text-slate-900">预算：¥{purchaseBrief.budget}</p>
-            </div>
-          </div>
-        </aside>
-      )}
+              <h2 className="text-sm font-semibold text-slate-900">
+                {card.title}
+              </h2>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-xs leading-relaxed text-slate-700">
+                {card.lines.map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+              <button
+                type="button"
+                onClick={() => handleSendCard(card)}
+                disabled={typing || sentCardIds.includes(card.id)}
+                className="mt-3 w-full rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+              >
+                {sentCardIds.includes(card.id) ? "已发送" : "发送到对话"}
+              </button>
+            </article>
+          ))}
+        </div>
+      </aside>
     </section>
-  )
+  );
 }

@@ -3,6 +3,7 @@ export type Personality = 'professional' | 'friendly' | 'concise'
 export type ChatRole = 'user' | 'assistant'
 
 export interface Demographics {
+  phone: string
   gender: string
   age: number | null
   education: string
