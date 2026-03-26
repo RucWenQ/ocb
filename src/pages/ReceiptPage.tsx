@@ -1,10 +1,17 @@
 import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import ReceiptTable from "../components/ReceiptTable";
+import { AVATAR_OPTIONS } from "../components/AvatarGrid";
+import ChatBubble from "../components/ChatBubble";
 import { receiptDataByCondition } from "../data/receiptData";
 import { useDataSubmit } from "../hooks/useDataSubmit";
 import { usePageTimer } from "../hooks/usePageTimer";
 import { useExperimentStore } from "../store/experimentStore";
+
+interface RenderMessage {
+  id: string;
+  role: "assistant";
+  content: string;
+}
 
 function formatDate(date: Date): string {
   return new Intl.DateTimeFormat("zh-CN", { dateStyle: "long" }).format(date);
@@ -18,17 +25,80 @@ export default function ReceiptPage() {
   const navigate = useNavigate();
   const submitData = useDataSubmit();
   const condition = useExperimentStore((state) => state.condition ?? "control");
-  const aiNickname = useExperimentStore(
-    (state) => state.aiConfig.nickname || "AI助理",
-  );
+  const aiConfig = useExperimentStore((state) => state.aiConfig);
   const setCurrentPage = useExperimentStore((state) => state.setCurrentPage);
   const setReceiptInfo = useExperimentStore((state) => state.setReceiptInfo);
 
   const receiptNo = useMemo(() => createReceiptNo(), []);
   const currentDate = useMemo(() => formatDate(new Date()), []);
   const { getDurationSeconds } = usePageTimer("receipt");
-
   const receiptData = receiptDataByCondition[condition];
+  const assistantName = aiConfig.nickname || "AI助理";
+  const assistantAvatar =
+    AVATAR_OPTIONS.find((item) => item.id === aiConfig.avatarId)?.emoji ?? "🤖";
+
+  const groupedLines = useMemo(() => {
+    const grouped = new Map<string, string[]>();
+    receiptData.items.forEach((item) => {
+      const line = `- ${item.name}（${item.quantity}，¥${item.subtotal.toLocaleString("zh-CN")}）`;
+      const existing = grouped.get(item.category) ?? [];
+      existing.push(line);
+      grouped.set(item.category, existing);
+    });
+    return Array.from(grouped.entries()).map(([category, lines]) => ({
+      category,
+      lines,
+    }));
+  }, [receiptData.items]);
+
+  const assistantMessages = useMemo<RenderMessage[]>(() => {
+    const messages: RenderMessage[] = [
+      {
+        id: "intro",
+        role: "assistant",
+        content: `我已完成本次采购，明细如下。\n回执编号：${receiptNo}\n采买日期：${currentDate}`,
+      },
+    ];
+
+    if (condition === "experimental" && receiptData.banner) {
+      messages.push({
+        id: "banner",
+        role: "assistant",
+        content: receiptData.banner,
+      });
+    }
+
+    groupedLines.forEach((group) => {
+      messages.push({
+        id: group.category,
+        role: "assistant",
+        content: `${group.category}\n${group.lines.join("\n")}`,
+      });
+    });
+
+    messages.push({
+      id: "summary",
+      role: "assistant",
+      content: `总计：¥${receiptData.total.toLocaleString("zh-CN")}\n预算剩余：¥${receiptData.remaining.toLocaleString("zh-CN")}`,
+    });
+
+    messages.push({
+      id: "footnote",
+      role: "assistant",
+      content: receiptData.footnote,
+    });
+
+    return messages;
+  }, [
+    condition,
+    currentDate,
+    groupedLines,
+    receiptData.banner,
+    receiptData.footnote,
+    receiptData.remaining,
+    receiptData.total,
+    receiptNo,
+  ]);
 
   const handleNext = async () => {
     const duration = getDurationSeconds();
@@ -43,42 +113,27 @@ export default function ReceiptPage() {
     });
 
     setCurrentPage(6);
-    navigate("/measure/peb");
+    navigate("/measure/ocb-scenarios");
   };
 
   return (
     <section className="mx-auto max-w-4xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <h1 className="text-2xl font-semibold text-slate-900">物资采买回执</h1>
-      <p className="mt-1 text-xs text-slate-500">
-        回执编号：{receiptNo} | 采买日期：{currentDate}
+      <h1 className="text-2xl font-semibold text-slate-900">采买回执</h1>
+      <p className="mt-2 text-sm text-slate-600">
+        以下为 {assistantName} 告知的采购结果。
       </p>
-      <div className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-sm text-slate-600">
-        <p>采购人：{aiNickname}</p>
-        <p>采购单位：行政部</p>
-      </div>
 
-      {condition === "experimental" && receiptData.banner && (
-        <div className="mt-4 rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-emerald-100 to-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          {receiptData.banner}
-        </div>
-      )}
-
-      <div className="thin-scrollbar mt-4 max-h-[min(60vh,34rem)] overflow-y-auto rounded-xl border border-slate-200 p-3 [touch-action:pan-y]">
-        <ReceiptTable
-          items={receiptData.items}
-          showEcoColumn={condition === "experimental"}
-        />
-        <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm">
-          <p className="flex items-center justify-between font-semibold text-slate-900">
-            <span>总计</span>
-            <span>¥{receiptData.total.toLocaleString("zh-CN")}</span>
-          </p>
-          <p className="mt-2 flex items-center justify-between text-slate-700">
-            <span>预算剩余</span>
-            <span>¥{receiptData.remaining.toLocaleString("zh-CN")}</span>
-          </p>
-        </div>
-        <p className="mt-3 text-sm text-slate-600">{receiptData.footnote}</p>
+      <div className="thin-scrollbar mt-4 max-h-[min(60vh,34rem)] space-y-3 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3">
+        {assistantMessages.map((message) => (
+          <ChatBubble
+            key={message.id}
+            role={message.role}
+            content={message.content}
+            avatar={assistantAvatar}
+            assistantName={assistantName}
+            asCard
+          />
+        ))}
       </div>
 
       <button

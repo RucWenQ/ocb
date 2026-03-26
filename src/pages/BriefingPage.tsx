@@ -107,7 +107,7 @@ export default function BriefingPage() {
       </div>
 
       <p className="text-sm text-slate-600">
-        为了相应AI赋能趋势，公司为每位员工配备了AI助理来协助工作。接下来请先设置你的AI助理，然后将工作任务发送给它处理。
+        为了顺应AI赋能趋势，公司为每位员工配备了AI助理来协助工作。接下来请先设置你的AI助理，然后将工作任务发送给它处理。
       </p>
 
       <button

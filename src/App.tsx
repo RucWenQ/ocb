@@ -5,8 +5,11 @@ import BriefingPage from './pages/BriefingPage'
 import ChatPage from './pages/ChatPage'
 import ConsentPage from './pages/ConsentPage'
 import DebriefPage from './pages/DebriefPage'
-import MeasurePage from './pages/MeasurePage'
+import OCBScalePage from './pages/OCBScalePage'
+import OCBScenarioPage from './pages/OCBScenarioPage'
+import PEBScalePage from './pages/PEBScalePage'
 import ReceiptPage from './pages/ReceiptPage'
+import ShoppingTaskPage from './pages/ShoppingTaskPage'
 import { useExperimentStore } from './store/experimentStore'
 import { pageForPath, pathForPage } from './utils/flow'
 
@@ -56,7 +59,10 @@ export default function App() {
             <Route path="/ai-editor" element={<AIEditorPage />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/receipt" element={<ReceiptPage />} />
-            <Route path="/measure/:scaleId" element={<MeasurePage />} />
+            <Route path="/measure/ocb-scenarios" element={<OCBScenarioPage />} />
+            <Route path="/measure/shopping-task" element={<ShoppingTaskPage />} />
+            <Route path="/measure/peb-scale" element={<PEBScalePage />} />
+            <Route path="/measure/ocb-scale" element={<OCBScalePage />} />
             <Route path="/debrief" element={<DebriefPage />} />
           </Route>
         </Route>

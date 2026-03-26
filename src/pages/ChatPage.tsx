@@ -21,7 +21,6 @@ interface RequirementCard {
   title: string;
   lines: string[];
   sendText: string;
-  toneClass: string;
 }
 
 function fallbackReply(userTurns: number): string {
@@ -71,12 +70,20 @@ export default function ChatPage() {
   const assistantName = aiConfig.nickname || "AI助理";
 
   const requirementCards = useMemo<RequirementCard[]>(() => {
+    const budgetCard: RequirementCard = {
+      id: "budget",
+      title: "整体预算",
+      lines: [
+        `本月行政部剩余预算：¥${purchaseBrief.budget.toLocaleString("zh-CN")}`,
+      ],
+      sendText: `整体预算要求：本月行政部剩余预算为 ¥${purchaseBrief.budget.toLocaleString("zh-CN")}，请在预算内完成全部采购。`,
+    };
+
     const departmentCards = departmentNeeds.map((dept) => ({
       id: dept.id,
       title: `${dept.name}（${dept.headcount}人）`,
       lines: dept.items,
       sendText: `${dept.name}需求（${dept.headcount}人）：\n${dept.items.map((item) => `- ${item}`).join("\n")}`,
-      toneClass: "border-slate-200 bg-white",
     }));
 
     const meetingCard: RequirementCard = {
@@ -89,20 +96,9 @@ export default function ChatPage() {
         `需准备：${purchaseBrief.meetingNeeds.join("、")}等`,
       ],
       sendText: `月度例会信息：\n- 会议时间：${purchaseBrief.meetingTime}\n- 参会人数：${purchaseBrief.participants}\n- 会议地点：${purchaseBrief.room}\n- 需准备：${purchaseBrief.meetingNeeds.join("、")}等`,
-      toneClass: "border-blue-200 bg-blue-50",
     };
 
-    const budgetCard: RequirementCard = {
-      id: "budget",
-      title: "整体预算",
-      lines: [
-        `本月行政部剩余预算：¥${purchaseBrief.budget.toLocaleString("zh-CN")}`,
-      ],
-      sendText: `整体预算要求：本月行政部剩余预算为 ¥${purchaseBrief.budget.toLocaleString("zh-CN")}，请在预算内完成全部采购。`,
-      toneClass: "border-brand-200 bg-brand-50",
-    };
-
-    return [...departmentCards, meetingCard, budgetCard];
+    return [budgetCard, ...departmentCards, meetingCard];
   }, []);
 
   const initialMessages: RenderMessage[] =
@@ -123,6 +119,10 @@ export default function ChatPage() {
   const userTurns = useMemo(
     () => messages.filter((item) => item.role === "user").length,
     [messages],
+  );
+  const allRequirementsSent = useMemo(
+    () => requirementCards.every((card) => sentCardIds.includes(card.id)),
+    [requirementCards, sentCardIds],
   );
 
   useEffect(() => {
@@ -383,14 +383,16 @@ ${departmentContext}
             onSend={handleSend}
           />
 
-          <button
-            type="button"
-            onClick={handleToReceipt}
-            disabled={typing || userTurns === 0}
-            className="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
-          >
-            查看采买回执 →
-          </button>
+          {allRequirementsSent && (
+            <button
+              type="button"
+              onClick={handleToReceipt}
+              disabled={typing || userTurns === 0}
+              className="w-full rounded-xl bg-brand-600 px-4 py-3 text-sm font-medium text-white transition hover:bg-brand-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
+              下一步 →
+            </button>
+          )}
         </div>
       </div>
 
@@ -403,7 +405,7 @@ ${departmentContext}
           {requirementCards.map((card) => (
             <article
               key={card.id}
-              className={`rounded-xl border p-3 ${card.toneClass}`}
+              className="rounded-xl border border-slate-200 bg-slate-50 p-3"
             >
               <h2 className="text-sm font-semibold text-slate-900">
                 {card.title}

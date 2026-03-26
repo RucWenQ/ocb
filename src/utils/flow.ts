@@ -1,8 +1,5 @@
-export const SCALE_SEQUENCE = ['peb', 'ocb'] as const
-export type ScaleId = (typeof SCALE_SEQUENCE)[number]
-
-export const TOTAL_PAGES = 8
-export const TOTAL_STEPS = 6
+export const TOTAL_PAGES = 10
+export const TOTAL_STEPS = 10
 
 const pageRouteMap: Record<number, string> = {
   1: '/consent',
@@ -10,29 +7,24 @@ const pageRouteMap: Record<number, string> = {
   3: '/ai-editor',
   4: '/chat',
   5: '/receipt',
-  6: '/measure/peb',
-  7: '/measure/ocb',
-  8: '/debrief',
+  6: '/measure/ocb-scenarios',
+  7: '/measure/shopping-task',
+  8: '/measure/peb-scale',
+  9: '/measure/ocb-scale',
+  10: '/debrief',
 }
 
 const pageLabelMap: Record<number, string> = {
-  1: '知情同意',
- 2: '情境阅读',
- 3: '设置AI助理',
- 4: 'AI协助采购',
- 5: '确认回执',
- 6: '问卷',
- 7: '问卷',
-  8: '实验结束',
-}
-
-const stepLabelMap: Record<number, string> = {
   1: '知情同意',
   2: '情境阅读',
   3: '设置AI助理',
   4: 'AI协助采购',
   5: '确认回执',
-  6: '问卷',
+  6: '情境判断',
+  7: '购物任务',
+  8: '行为问卷',
+  9: '工作问卷',
+  10: '完成',
 }
 
 export function pathForPage(page: number): string {
@@ -49,27 +41,18 @@ export function pageForPath(pathname: string): number | null {
   if (pathname === '/ai-editor') return 3
   if (pathname === '/chat') return 4
   if (pathname === '/receipt') return 5
-  if (pathname === '/measure/peb') return 6
-  if (pathname === '/measure/ocb') return 7
-  if (pathname === '/debrief') return 8
+  if (pathname === '/measure/ocb-scenarios') return 6
+  if (pathname === '/measure/shopping-task') return 7
+  if (pathname === '/measure/peb-scale') return 8
+  if (pathname === '/measure/ocb-scale') return 9
+  if (pathname === '/debrief') return 10
   return null
 }
 
 export function stepForPage(page: number): number {
-  if (page <= 1) return 1
-  if (page === 2) return 2
-  if (page === 3) return 3
-  if (page === 4) return 4
-  if (page === 5) return 5
-  return 6
+  return Math.min(Math.max(page, 1), TOTAL_STEPS)
 }
 
 export function stepLabelForPage(page: number): string {
-  return stepLabelMap[stepForPage(page)] ?? '实验流程'
-}
-
-export function nextScaleId(scaleId: string): ScaleId | null {
-  const idx = SCALE_SEQUENCE.indexOf(scaleId as ScaleId)
-  if (idx < 0 || idx === SCALE_SEQUENCE.length - 1) return null
-  return SCALE_SEQUENCE[idx + 1]
+  return labelForPage(stepForPage(page))
 }
