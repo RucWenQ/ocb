@@ -1,20 +1,4 @@
-export interface AvatarOption {
-  id: string;
-  emoji: string;
-  tone: string;
-}
-
-export const AVATAR_OPTIONS: AvatarOption[] = [
-  { id: "a1", emoji: "🤖", tone: "bg-blue-100" },
-  { id: "a2", emoji: "🧠", tone: "bg-cyan-100" },
-  { id: "a3", emoji: "💡", tone: "bg-amber-100" },
-  { id: "a4", emoji: "🔮", tone: "bg-indigo-100" },
-  { id: "a5", emoji: "⚡", tone: "bg-yellow-100" },
-  { id: "a6", emoji: "🌟", tone: "bg-emerald-100" },
-  { id: "a7", emoji: "🎯", tone: "bg-rose-100" },
-  { id: "a8", emoji: "🔧", tone: "bg-orange-100" },
-  { id: "a9", emoji: "📊", tone: "bg-sky-100" },
-];
+import { AVATAR_OPTIONS } from "../data/avatarOptions";
 
 interface AvatarGridProps {
   selectedId: string;

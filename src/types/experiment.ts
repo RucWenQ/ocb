@@ -70,15 +70,29 @@ export interface PebScaleState {
   peb4: number | null
   peb5: number | null
   peb6: number | null
+  peb7: number | null
 }
 
-export interface OcbScaleState {
-  ocbi1: number | null
-  ocbo1: number | null
-  ocbi2: number | null
-  ocbo2: number | null
-  ocbi3: number | null
-  ocbo3: number | null
-  ocbi4: number | null
-  ocbo4: number | null
+export interface MoralDisengagementScaleState {
+  md1: number | null
+  md2: number | null
+  md3: number | null
+  md4: number | null
+  md5: number | null
+  md6: number | null
+  mdCheck: number | null
+}
+
+export interface MoralIdentityScaleState {
+  mi1: number | null
+  mi2: number | null
+  mi3: number | null
+  mi4: number | null
+  mi5: number | null
+  mi6: number | null
+  mi7: number | null
+  mi8: number | null
+  mi9: number | null
+  mi10: number | null
+  miCheck: number | null
 }

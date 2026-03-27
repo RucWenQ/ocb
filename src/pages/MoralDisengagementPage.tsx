@@ -1,55 +1,55 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LikertScale from '../components/LikertScale'
-import { ocbItems } from '../data/scales/ocbScale'
+import { moralDisengagementItems } from '../data/scales/moralDisengagementScale'
 import { useDataSubmit } from '../hooks/useDataSubmit'
 import { usePageTimer } from '../hooks/usePageTimer'
 import { useExperimentStore } from '../store/experimentStore'
-import type { OcbScaleState } from '../types/experiment'
+import type { MoralDisengagementScaleState } from '../types/experiment'
 
-export default function OCBScalePage() {
-  usePageTimer('ocbScale')
+export default function MoralDisengagementPage() {
+  usePageTimer('moralDisengagement')
 
   const navigate = useNavigate()
   const submitData = useDataSubmit()
-  const ocbScale = useExperimentStore((state) => state.ocbScale)
-  const setOcbScaleValue = useExperimentStore((state) => state.setOcbScaleValue)
+  const scale = useExperimentStore((state) => state.moralDisengagementScale)
+  const setScaleValue = useExperimentStore((state) => state.setMoralDisengagementValue)
   const setCurrentPage = useExperimentStore((state) => state.setCurrentPage)
   const [invalidIds, setInvalidIds] = useState<string[]>([])
 
   const allAnswered = useMemo(() => {
-    return ocbItems.every((item) => ocbScale[item.id] !== null)
-  }, [ocbScale])
-  const ocbValues = useMemo<Record<string, number | null>>(() => ({ ...ocbScale }), [ocbScale])
+    return moralDisengagementItems.every((item) => scale[item.id] !== null)
+  }, [scale])
+  const values = useMemo<Record<string, number | null>>(() => ({ ...scale }), [scale])
 
   const handleNext = async () => {
     if (!allAnswered) {
-      setInvalidIds(ocbItems.filter((item) => ocbScale[item.id] === null).map((item) => item.id))
+      setInvalidIds(moralDisengagementItems.filter((item) => scale[item.id] === null).map((item) => item.id))
       return
     }
 
     setInvalidIds([])
-    await submitData('measure-ocb-scale', ocbScale)
+    await submitData('measure-moral-disengagement', scale)
     setCurrentPage(10)
-    navigate('/debrief')
+    navigate('/measure/moral-identity')
   }
 
   return (
     <section className="mx-auto max-w-5xl space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <h1 className="text-2xl font-semibold text-slate-900">OCB意愿量表</h1>
+      <h1 className="text-2xl font-semibold text-slate-900">道德推脱</h1>
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-700">
-        <p>请继续以行政专员的身份思考。在接下来的工作中，你在多大程度上愿意做以下事情？</p>
-        <p className="mt-1">1 = 非常不愿意，4 = 一般，7 = 非常愿意</p>
+        <p>此时此刻，您是否同意以下陈述，请选择符合您当前想法的选项。</p>
+        <p className="mt-1">1 = 非常不赞同，4 = 不确定，7 = 非常赞同</p>
       </div>
 
       <LikertScale
-        items={ocbItems.map((item) => ({ id: item.id, text: item.text }))}
+        items={moralDisengagementItems.map((item) => ({ id: item.id, text: item.text }))}
         points={7}
-        anchors={{ low: '非常不愿意', mid: '一般', high: '非常愿意' }}
-        values={ocbValues}
+        anchors={{ low: '非常不赞同', mid: '不确定', high: '非常赞同' }}
+        values={values}
         invalidIds={invalidIds}
         onChange={(id, value) => {
-          setOcbScaleValue(id as keyof OcbScaleState, value)
+          setScaleValue(id as keyof MoralDisengagementScaleState, value)
           if (invalidIds.includes(id)) {
             setInvalidIds((prev) => prev.filter((itemId) => itemId !== id))
           }

@@ -1,48 +1,52 @@
 interface ChatBubbleProps {
-  role: 'system' | 'user' | 'assistant'
-  content: string
-  avatar?: string
-  assistantName?: string
-  asCard?: boolean
+  role: "system" | "user" | "assistant";
+  content: string;
+  avatar?: string;
+  assistantName?: string;
+  asCard?: boolean;
 }
 
 export default function ChatBubble({
   role,
   content,
-  avatar = '🤖',
-  assistantName = 'AI助理',
+  avatar = "🤖",
+  assistantName = "AI助理",
   asCard = false,
 }: ChatBubbleProps) {
-  if (role === 'system') {
-    return <p className="text-center text-xs text-slate-500">{content}</p>
+  if (role === "system") {
+    return <p className="text-center text-xs text-slate-500">{content}</p>;
   }
 
-  const assistant = role === 'assistant'
+  const assistant = role === "assistant";
 
   return (
-    <div className={`flex items-end gap-2 ${assistant ? 'justify-start' : 'justify-end'}`}>
+    <div className={`flex items-end gap-2 ${assistant ? "justify-start" : "justify-end"}`}>
       {assistant && (
         <div className="w-12 shrink-0 text-center">
-          <div className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-brand-100 text-sm">{avatar}</div>
-          <p className="mt-1 truncate text-[10px] leading-tight text-slate-500">{assistantName}</p>
+          <div className="mx-auto grid h-8 w-8 place-items-center rounded-full bg-brand-100 text-sm">
+            {avatar}
+          </div>
+          <p className="mt-1 truncate text-[10px] leading-tight text-slate-500">
+            {assistantName}
+          </p>
         </div>
       )}
 
       <div
         className={`max-w-[82%] rounded-2xl px-4 py-2 text-sm leading-relaxed sm:max-w-[70%] ${
           asCard
-            ? 'border border-brand-200 bg-brand-50 text-slate-800'
+            ? "border border-brand-200 bg-brand-50 text-slate-800"
             : assistant
-              ? 'rounded-bl-md bg-white text-slate-800 shadow-sm'
-              : 'rounded-br-md bg-brand-600 text-white'
+              ? "rounded-bl-md bg-white text-slate-800 shadow-sm"
+              : "rounded-br-md bg-brand-600 text-white"
         }`}
       >
-        {content.split('\n').map((line, idx) => (
-          <p key={`${line}-${idx}`} className={idx === 0 ? '' : 'mt-1'}>
+        {content.split("\n").map((line, idx) => (
+          <p key={`${line}-${idx}`} className={idx === 0 ? "" : "mt-1"}>
             {line}
           </p>
         ))}
       </div>
     </div>
-  )
+  );
 }

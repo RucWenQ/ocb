@@ -31,21 +31,21 @@ export default function PEBScalePage() {
     setInvalidIds([])
     await submitData('measure-peb-scale', pebScale)
     setCurrentPage(9)
-    navigate('/measure/ocb-scale')
+    navigate('/measure/moral-disengagement')
   }
 
   return (
     <section className="mx-auto max-w-5xl space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <h1 className="text-2xl font-semibold text-slate-900">PEB意愿量表</h1>
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-700">
-        <p>以下是一些日常生活中的行为。请根据你的实际情况，评价你平时做这些事情的频率。</p>
-        <p className="mt-1">1 = 从不，4 = 有时，7 = 总是</p>
+        <p>未来一个月，您进行如下行为的可能性有多高。</p>
+        <p className="mt-1">1 = 完全不可能，4 = 不确定，7 = 完全可能</p>
       </div>
 
       <LikertScale
         items={pebItems.map((item) => ({ id: item.id, text: item.text }))}
         points={7}
-        anchors={{ low: '从不', mid: '有时', high: '总是' }}
+        anchors={{ low: '完全不可能', mid: '不确定', high: '完全可能' }}
         values={pebValues}
         invalidIds={invalidIds}
         onChange={(id, value) => {

@@ -6,8 +6,9 @@ import type {
   ChatRecord,
   Condition,
   Demographics,
+  MoralDisengagementScaleState,
+  MoralIdentityScaleState,
   OcbOptionKey,
-  OcbScaleState,
   OcbScenarioKey,
   OcbScenariosState,
   PebScaleState,
@@ -36,7 +37,9 @@ interface ExperimentState {
   ocbScenarios: OcbScenariosState
   shoppingChoices: ShoppingChoicesState
   pebScale: PebScaleState
-  ocbScale: OcbScaleState
+  moralDisengagementScale: MoralDisengagementScaleState
+  moralIdentityScale: MoralIdentityScaleState
+  ocbScenarioAttentionCheck: number | null
 
   dvResponses: Record<string, unknown>
   pageDurations: Record<string, number>
@@ -51,9 +54,11 @@ interface ExperimentState {
   setReceiptInfo: (confirmed: boolean, duration: number) => void
   setOcbScenarioRating: (scenario: OcbScenarioKey, option: OcbOptionKey, value: number) => void
   setOcbScenarioOrder: (scenario: OcbScenarioKey, order: string[]) => void
+  setOcbScenarioAttentionCheck: (value: number) => void
   setShoppingChoice: (category: ShoppingCategoryKey, choice: Exclude<ShoppingChoice, null>) => void
   setPebScaleValue: (itemId: keyof PebScaleState, value: number) => void
-  setOcbScaleValue: (itemId: keyof OcbScaleState, value: number) => void
+  setMoralDisengagementValue: (itemId: keyof MoralDisengagementScaleState, value: number) => void
+  setMoralIdentityValue: (itemId: keyof MoralIdentityScaleState, value: number) => void
   resetDVState: () => void
   saveDVResponse: (scaleId: string, responses: Record<string, unknown>) => void
   recordPageDuration: (pageId: string, duration: number) => void
@@ -120,17 +125,31 @@ const defaultPebScale: PebScaleState = {
   peb4: null,
   peb5: null,
   peb6: null,
+  peb7: null,
 }
 
-const defaultOcbScale: OcbScaleState = {
-  ocbi1: null,
-  ocbo1: null,
-  ocbi2: null,
-  ocbo2: null,
-  ocbi3: null,
-  ocbo3: null,
-  ocbi4: null,
-  ocbo4: null,
+const defaultMoralDisengagementScale: MoralDisengagementScaleState = {
+  md1: null,
+  md2: null,
+  md3: null,
+  md4: null,
+  md5: null,
+  md6: null,
+  mdCheck: null,
+}
+
+const defaultMoralIdentityScale: MoralIdentityScaleState = {
+  mi1: null,
+  mi2: null,
+  mi3: null,
+  mi4: null,
+  mi5: null,
+  mi6: null,
+  mi7: null,
+  mi8: null,
+  mi9: null,
+  mi10: null,
+  miCheck: null,
 }
 
 export const useExperimentStore = create<ExperimentState>()(
@@ -149,7 +168,9 @@ export const useExperimentStore = create<ExperimentState>()(
       ocbScenarios: defaultOcbScenarios,
       shoppingChoices: defaultShoppingChoices,
       pebScale: defaultPebScale,
-      ocbScale: defaultOcbScale,
+      moralDisengagementScale: defaultMoralDisengagementScale,
+      moralIdentityScale: defaultMoralIdentityScale,
+      ocbScenarioAttentionCheck: null,
       dvResponses: {},
       pageDurations: {},
 
@@ -217,6 +238,8 @@ export const useExperimentStore = create<ExperimentState>()(
           }
         }),
 
+      setOcbScenarioAttentionCheck: (value) => set({ ocbScenarioAttentionCheck: value }),
+
       setShoppingChoice: (category, choice) =>
         set((state) => {
           const next = {
@@ -242,10 +265,18 @@ export const useExperimentStore = create<ExperimentState>()(
           },
         })),
 
-      setOcbScaleValue: (itemId, value) =>
+      setMoralDisengagementValue: (itemId, value) =>
         set((state) => ({
-          ocbScale: {
-            ...state.ocbScale,
+          moralDisengagementScale: {
+            ...state.moralDisengagementScale,
+            [itemId]: value,
+          },
+        })),
+
+      setMoralIdentityValue: (itemId, value) =>
+        set((state) => ({
+          moralIdentityScale: {
+            ...state.moralIdentityScale,
             [itemId]: value,
           },
         })),
@@ -255,7 +286,9 @@ export const useExperimentStore = create<ExperimentState>()(
           ocbScenarios: defaultOcbScenarios,
           shoppingChoices: defaultShoppingChoices,
           pebScale: defaultPebScale,
-          ocbScale: defaultOcbScale,
+          moralDisengagementScale: defaultMoralDisengagementScale,
+          moralIdentityScale: defaultMoralIdentityScale,
+          ocbScenarioAttentionCheck: null,
         }),
 
       saveDVResponse: (scaleId, responses) =>
@@ -291,7 +324,9 @@ export const useExperimentStore = create<ExperimentState>()(
         ocbScenarios: state.ocbScenarios,
         shoppingChoices: state.shoppingChoices,
         pebScale: state.pebScale,
-        ocbScale: state.ocbScale,
+        moralDisengagementScale: state.moralDisengagementScale,
+        moralIdentityScale: state.moralIdentityScale,
+        ocbScenarioAttentionCheck: state.ocbScenarioAttentionCheck,
         dvResponses: state.dvResponses,
         pageDurations: state.pageDurations,
       }),

@@ -7,6 +7,7 @@ import { usePageTimer } from '../hooks/usePageTimer'
 import { useExperimentStore } from '../store/experimentStore'
 import type { OcbScenarioKey } from '../types/experiment'
 import { seededShuffle } from '../utils/shuffle'
+import { RatingButtons } from '../components/LikertScale'
 
 type InvalidMap = Record<OcbScenarioKey, string[]>
 
@@ -29,6 +30,8 @@ export default function OCBScenarioPage() {
   const ocbScenariosState = useExperimentStore((state) => state.ocbScenarios)
   const setOcbScenarioRating = useExperimentStore((state) => state.setOcbScenarioRating)
   const setOcbScenarioOrder = useExperimentStore((state) => state.setOcbScenarioOrder)
+  const ocbScenarioAttentionCheck = useExperimentStore((state) => state.ocbScenarioAttentionCheck)
+  const setOcbScenarioAttentionCheck = useExperimentStore((state) => state.setOcbScenarioAttentionCheck)
   const setCurrentPage = useExperimentStore((state) => state.setCurrentPage)
   const [invalidMap, setInvalidMap] = useState<InvalidMap>(emptyInvalidMap)
 
@@ -67,12 +70,13 @@ export default function OCBScenarioPage() {
   }, [ocbScenariosState, renderedScenarios, setOcbScenarioOrder])
 
   const allAnswered = useMemo(() => {
-    return renderedScenarios.every((scenario) =>
+    const scenarioAnswered = renderedScenarios.every((scenario) =>
       scenario.options.every((option) => {
         return ocbScenariosState[scenario.id][option.optionKey] !== null
       }),
     )
-  }, [ocbScenariosState, renderedScenarios])
+    return scenarioAnswered && ocbScenarioAttentionCheck !== null
+  }, [ocbScenarioAttentionCheck, ocbScenariosState, renderedScenarios])
 
   const handleNext = async () => {
     if (!allAnswered) {
@@ -95,7 +99,10 @@ export default function OCBScenarioPage() {
     }
 
     setInvalidMap(emptyInvalidMap)
-    await submitData('measure-ocb-scenarios', ocbScenariosState)
+    await submitData('measure-ocb-scenarios', {
+      ...ocbScenariosState,
+      attentionCheck: ocbScenarioAttentionCheck,
+    })
     setCurrentPage(7)
     navigate('/measure/shopping-task')
   }
@@ -139,6 +146,20 @@ export default function OCBScenarioPage() {
           )
         })}
       </div>
+
+      <article className="rounded-xl border border-slate-200 bg-white p-4">
+        <p className="text-sm text-slate-800">
+          做事风格题：请在本题选择“非常不符合”。
+        </p>
+        <div className="mt-3">
+          <RatingButtons
+            value={ocbScenarioAttentionCheck}
+            onChange={setOcbScenarioAttentionCheck}
+            showAnchors
+            anchors={{ low: '非常不符合', mid: '说不上符合还是不符合', high: '非常符合' }}
+          />
+        </div>
+      </article>
 
       <button
         type="button"

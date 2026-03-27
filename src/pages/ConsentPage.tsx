@@ -50,10 +50,11 @@ async function isPhoneRegistered(phone: string): Promise<boolean> {
   const checkEndpoint = import.meta.env.VITE_PHONE_CHECK_ENDPOINT as
     | string
     | undefined;
-  if (checkEndpoint) {
+  const endpoint = checkEndpoint ?? "/api/participants/check-phone";
+  if (endpoint) {
     try {
       const response = await fetch(
-        `${checkEndpoint}?phone=${encodeURIComponent(phone)}`,
+        `${endpoint}?phone=${encodeURIComponent(phone)}`,
       );
       if (response.ok) {
         const payload = (await response.json()) as {
@@ -168,18 +169,14 @@ export default function ConsentPage() {
 
   return (
     <section className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <h1 className="text-2xl font-semibold text-slate-900">
-        研究参与知情同意书
-      </h1>
-      <p className="mt-2 text-sm text-slate-600">
+      {/* <h1 className="text-2xl font-semibold text-slate-900">知情同意书</h1> */}
+      {/* <p className="mt-2 text-sm text-slate-600">
         请先阅读并同意以下说明。你可在任意时点退出实验，所有数据仅用于学术研究。
-      </p>
+      </p> */}
 
       <div className="mt-5 rounded-xl border border-slate-200">
         <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
-          <h2 className="text-sm font-semibold text-slate-700">
-            研究参与知情同意书
-          </h2>
+          <h2 className="text-sm font-semibold text-slate-700">知情同意书</h2>
         </div>
         <div className="thin-scrollbar h-44 overflow-y-auto px-4 py-3 text-sm leading-relaxed text-slate-700">
           {consentText.map((paragraph) => (

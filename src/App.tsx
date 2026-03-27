@@ -5,7 +5,8 @@ import BriefingPage from './pages/BriefingPage'
 import ChatPage from './pages/ChatPage'
 import ConsentPage from './pages/ConsentPage'
 import DebriefPage from './pages/DebriefPage'
-import OCBScalePage from './pages/OCBScalePage'
+import MoralDisengagementPage from './pages/MoralDisengagementPage'
+import MoralIdentityPage from './pages/MoralIdentityPage'
 import OCBScenarioPage from './pages/OCBScenarioPage'
 import PEBScalePage from './pages/PEBScalePage'
 import ReceiptPage from './pages/ReceiptPage'
@@ -62,7 +63,8 @@ export default function App() {
             <Route path="/measure/ocb-scenarios" element={<OCBScenarioPage />} />
             <Route path="/measure/shopping-task" element={<ShoppingTaskPage />} />
             <Route path="/measure/peb-scale" element={<PEBScalePage />} />
-            <Route path="/measure/ocb-scale" element={<OCBScalePage />} />
+            <Route path="/measure/moral-disengagement" element={<MoralDisengagementPage />} />
+            <Route path="/measure/moral-identity" element={<MoralIdentityPage />} />
             <Route path="/debrief" element={<DebriefPage />} />
           </Route>
         </Route>

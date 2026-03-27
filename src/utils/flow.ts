@@ -1,5 +1,5 @@
-export const TOTAL_PAGES = 10
-export const TOTAL_STEPS = 10
+export const TOTAL_PAGES = 11
+export const TOTAL_STEPS = 11
 
 const pageRouteMap: Record<number, string> = {
   1: '/consent',
@@ -10,8 +10,9 @@ const pageRouteMap: Record<number, string> = {
   6: '/measure/ocb-scenarios',
   7: '/measure/shopping-task',
   8: '/measure/peb-scale',
-  9: '/measure/ocb-scale',
-  10: '/debrief',
+  9: '/measure/moral-disengagement',
+  10: '/measure/moral-identity',
+  11: '/debrief',
 }
 
 const pageLabelMap: Record<number, string> = {
@@ -22,9 +23,10 @@ const pageLabelMap: Record<number, string> = {
   5: '确认回执',
   6: '情境判断',
   7: '购物任务',
-  8: '行为问卷',
-  9: '工作问卷',
-  10: '完成',
+  8: '环保行为',
+  9: '道德推脱',
+  10: '道德认同',
+  11: '完成',
 }
 
 export function pathForPage(page: number): string {
@@ -44,8 +46,9 @@ export function pageForPath(pathname: string): number | null {
   if (pathname === '/measure/ocb-scenarios') return 6
   if (pathname === '/measure/shopping-task') return 7
   if (pathname === '/measure/peb-scale') return 8
-  if (pathname === '/measure/ocb-scale') return 9
-  if (pathname === '/debrief') return 10
+  if (pathname === '/measure/moral-disengagement') return 9
+  if (pathname === '/measure/moral-identity') return 10
+  if (pathname === '/debrief') return 11
   return null
 }
 

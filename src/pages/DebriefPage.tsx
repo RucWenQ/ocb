@@ -21,9 +21,11 @@ export default function DebriefPage() {
   const receiptConfirmed = useExperimentStore((state) => state.receiptConfirmed)
   const receiptViewDuration = useExperimentStore((state) => state.receiptViewDuration)
   const ocbScenarios = useExperimentStore((state) => state.ocbScenarios)
+  const ocbScenarioAttentionCheck = useExperimentStore((state) => state.ocbScenarioAttentionCheck)
   const shoppingChoices = useExperimentStore((state) => state.shoppingChoices)
   const pebScale = useExperimentStore((state) => state.pebScale)
-  const ocbScale = useExperimentStore((state) => state.ocbScale)
+  const moralDisengagementScale = useExperimentStore((state) => state.moralDisengagementScale)
+  const moralIdentityScale = useExperimentStore((state) => state.moralIdentityScale)
   const pageDurations = useExperimentStore((state) => state.pageDurations)
   const [status, setStatus] = useState<SubmitStatus>('submitting')
 
@@ -61,9 +63,11 @@ export default function DebriefPage() {
       receiptViewDuration,
       dv: {
         ocbScenarios,
+        ocbScenarioAttentionCheck,
         shoppingChoices,
         pebScale,
-        ocbScale,
+        moralDisengagementScale,
+        moralIdentityScale,
       },
       pageDurations,
     }),
@@ -81,7 +85,9 @@ export default function DebriefPage() {
       demographics.gender,
       demographics.workExperience,
       endTime,
-      ocbScale,
+      moralDisengagementScale,
+      moralIdentityScale,
+      ocbScenarioAttentionCheck,
       ocbScenarios,
       pageDurations,
       participantId,
