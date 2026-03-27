@@ -36,10 +36,8 @@ export default function PEBScalePage() {
 
   return (
     <section className="mx-auto max-w-5xl space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-      <h1 className="text-2xl font-semibold text-slate-900">PEB意愿量表</h1>
       <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-7 text-slate-700">
         <p>未来一个月，您进行如下行为的可能性有多高。</p>
-        <p className="mt-1">1 = 完全不可能，4 = 不确定，7 = 完全可能</p>
       </div>
 
       <LikertScale

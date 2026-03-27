@@ -7,7 +7,8 @@ interface ScenarioRatingOption {
 
 interface ScenarioRatingCardProps {
   scenarioId: string
-  title: string
+  title?: string
+  showTitle?: boolean
   description: string
   options: ScenarioRatingOption[]
   values: Record<string, number | null>
@@ -15,8 +16,15 @@ interface ScenarioRatingCardProps {
   invalidOptionIds?: string[]
 }
 
+const scenarioAnchors = {
+  low: '完全不可能',
+  mid: '说不准',
+  high: '非常可能',
+}
+
 export default function ScenarioRatingCard({
   title,
+  showTitle = true,
   description,
   options,
   values,
@@ -25,12 +33,16 @@ export default function ScenarioRatingCard({
 }: ScenarioRatingCardProps) {
   return (
     <article className="rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-200 px-4 py-3">
-        <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">{title}</span>
-      </div>
+      {showTitle && title && (
+        <div className="border-b border-slate-200 px-4 py-3">
+          <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
+            {title}
+          </span>
+        </div>
+      )}
       <div className="bg-slate-50 px-4 py-4 text-sm leading-7 text-slate-700">{description}</div>
       <div className="divide-y divide-slate-200">
-        {options.map((option, index) => {
+        {options.map((option) => {
           const invalid = invalidOptionIds.includes(option.id)
           return (
             <div
@@ -43,8 +55,8 @@ export default function ScenarioRatingCard({
                   <RatingButtons
                     value={values[option.id] ?? null}
                     onChange={(value) => onChange(option.id, value)}
-                    showAnchors={index === 0}
-                    anchors={{ low: '完全不可能', mid: '说不准', high: '非常可能' }}
+                    showAnchors
+                    anchors={scenarioAnchors}
                   />
                 </div>
               </div>

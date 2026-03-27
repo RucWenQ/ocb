@@ -39,8 +39,6 @@ interface ExperimentState {
   pebScale: PebScaleState
   moralDisengagementScale: MoralDisengagementScaleState
   moralIdentityScale: MoralIdentityScaleState
-  ocbScenarioAttentionCheck: number | null
-
   dvResponses: Record<string, unknown>
   pageDurations: Record<string, number>
 
@@ -54,7 +52,6 @@ interface ExperimentState {
   setReceiptInfo: (confirmed: boolean, duration: number) => void
   setOcbScenarioRating: (scenario: OcbScenarioKey, option: OcbOptionKey, value: number) => void
   setOcbScenarioOrder: (scenario: OcbScenarioKey, order: string[]) => void
-  setOcbScenarioAttentionCheck: (value: number) => void
   setShoppingChoice: (category: ShoppingCategoryKey, choice: Exclude<ShoppingChoice, null>) => void
   setPebScaleValue: (itemId: keyof PebScaleState, value: number) => void
   setMoralDisengagementValue: (itemId: keyof MoralDisengagementScaleState, value: number) => void
@@ -86,6 +83,7 @@ const defaultOcbScenarioRatings = {
   optB: null,
   optC: null,
   optD: null,
+  optE: null,
 }
 
 const defaultOcbScenarios: OcbScenariosState = {
@@ -170,7 +168,6 @@ export const useExperimentStore = create<ExperimentState>()(
       pebScale: defaultPebScale,
       moralDisengagementScale: defaultMoralDisengagementScale,
       moralIdentityScale: defaultMoralIdentityScale,
-      ocbScenarioAttentionCheck: null,
       dvResponses: {},
       pageDurations: {},
 
@@ -238,8 +235,6 @@ export const useExperimentStore = create<ExperimentState>()(
           }
         }),
 
-      setOcbScenarioAttentionCheck: (value) => set({ ocbScenarioAttentionCheck: value }),
-
       setShoppingChoice: (category, choice) =>
         set((state) => {
           const next = {
@@ -288,7 +283,6 @@ export const useExperimentStore = create<ExperimentState>()(
           pebScale: defaultPebScale,
           moralDisengagementScale: defaultMoralDisengagementScale,
           moralIdentityScale: defaultMoralIdentityScale,
-          ocbScenarioAttentionCheck: null,
         }),
 
       saveDVResponse: (scaleId, responses) =>
@@ -326,7 +320,6 @@ export const useExperimentStore = create<ExperimentState>()(
         pebScale: state.pebScale,
         moralDisengagementScale: state.moralDisengagementScale,
         moralIdentityScale: state.moralIdentityScale,
-        ocbScenarioAttentionCheck: state.ocbScenarioAttentionCheck,
         dvResponses: state.dvResponses,
         pageDurations: state.pageDurations,
       }),

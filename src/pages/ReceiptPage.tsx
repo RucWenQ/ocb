@@ -70,10 +70,12 @@ export default function ReceiptPage() {
     grouped.set(category, existing);
   });
 
-  const groupedSections = Array.from(grouped.entries()).map(([category, items]) => ({
-    category,
-    items,
-  }));
+  const groupedSections = Array.from(grouped.entries()).map(
+    ([category, items]) => ({
+      category,
+      items,
+    }),
+  );
 
   const listedTotal = toNumber(receiptData?.total, Number.NaN);
   const totalAmount = Number.isFinite(listedTotal)
@@ -107,7 +109,9 @@ export default function ReceiptPage() {
   return (
     <section className="mx-auto max-w-4xl rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
       <h1 className="text-2xl font-semibold text-slate-900">采购回执</h1>
-      <p className="mt-2 text-sm text-slate-600">以下是 {assistantName} 告知的采购结果。</p>
+      <p className="mt-2 text-sm text-slate-600">
+        以下是 {assistantName} 的采购结果。
+      </p>
 
       <div className="thin-scrollbar mt-4 max-h-[min(68vh,42rem)] overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3">
         <div className="flex items-end gap-2">
@@ -122,7 +126,9 @@ export default function ReceiptPage() {
 
           <div className="max-w-[82%] rounded-2xl border border-brand-200 bg-brand-50 px-4 py-3 text-sm leading-relaxed text-slate-800 sm:max-w-[70%]">
             <div className="rounded-xl border border-slate-300 bg-white p-4">
-              <h2 className="text-center text-base font-semibold text-slate-900">采购回执单</h2>
+              <h2 className="text-center text-base font-semibold text-slate-900">
+                采购回执单
+              </h2>
               <div className="mt-3 grid gap-2 border-y border-slate-200 py-3 text-xs text-slate-700 sm:grid-cols-2">
                 <p>回执编号：{receiptNo}</p>
                 <p>采购日期：{currentDate}</p>
@@ -148,15 +154,25 @@ export default function ReceiptPage() {
                     <table className="w-full text-xs">
                       <thead className="bg-slate-50 text-slate-500">
                         <tr>
-                          <th className="px-3 py-1.5 text-left font-medium">物资</th>
-                          <th className="px-3 py-1.5 text-left font-medium">规格说明</th>
-                          <th className="px-3 py-1.5 text-center font-medium">数量</th>
-                          <th className="px-3 py-1.5 text-right font-medium">小计</th>
+                          <th className="px-3 py-1.5 text-left font-medium">
+                            物资
+                          </th>
+                          <th className="px-3 py-1.5 text-left font-medium">
+                            规格说明
+                          </th>
+                          <th className="px-3 py-1.5 text-center font-medium">
+                            数量
+                          </th>
+                          <th className="px-3 py-1.5 text-right font-medium">
+                            小计
+                          </th>
                         </tr>
                       </thead>
                       <tbody>
                         {section.items.map((item) => (
-                          <tr key={`${section.category}-${item.name}-${item.spec}`}>
+                          <tr
+                            key={`${section.category}-${item.name}-${item.spec}`}
+                          >
                             <td className="border-t border-slate-100 px-3 py-1.5 text-slate-700">
                               {item.name}
                             </td>
@@ -188,7 +204,9 @@ export default function ReceiptPage() {
                 </p>
               </div>
 
-              <p className="mt-3 text-xs leading-6 text-slate-600">{footnote}</p>
+              <p className="mt-3 text-xs leading-6 text-slate-600">
+                {footnote}
+              </p>
             </div>
           </div>
         </div>

@@ -2,7 +2,7 @@ export type Condition = 'experimental' | 'control'
 export type Personality = 'professional' | 'friendly' | 'concise'
 export type ChatRole = 'user' | 'assistant'
 export type OcbScenarioKey = 'scenario1' | 'scenario2' | 'scenario3'
-export type OcbOptionKey = 'optA' | 'optB' | 'optC' | 'optD'
+export type OcbOptionKey = 'optA' | 'optB' | 'optC' | 'optD' | 'optE'
 export type ShoppingCategoryKey =
   | 'chopsticks'
   | 'trashbag'
@@ -41,6 +41,7 @@ export interface OcbScenarioRatings {
   optB: number | null
   optC: number | null
   optD: number | null
+  optE: number | null
 }
 
 export interface OcbScenariosState {
