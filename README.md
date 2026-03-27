@@ -1,73 +1,69 @@
-# React + TypeScript + Vite
+# OCB 实验系统（前后端可部署版）
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+本项目已拆分为：
+- 前端：React + Vite（`src/`）
+- 后端：Node + Express（`server/index.mjs`）
 
-Currently, two official plugins are available:
+前端所有数据提交统一走 `/api/*`，开发和生产路径一致。
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 1. 安装依赖
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 2. 本地开发
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+该命令会同时启动：
+- 前端开发服务：`http://localhost:5173`
+- 后端 API：`http://127.0.0.1:8787`
+
+Vite 已配置代理，前端请求 `/api/*` 会自动转发到后端。
+
+## 3. 生产部署
+
+```bash
+npm run build
+npm run start
+```
+
+`start` 会启动后端服务，并在 `dist/` 存在时同时托管前端静态文件。
+
+## 4. 数据存储位置
+
+默认落盘目录：`data/`
+
+- 手机号去重库：`data/registered-phones.json`
+- 页面提交日志：`data/submissions.jsonl`
+- 最终提交日志：`data/final-submissions.jsonl`
+
+## 5. 环境变量
+
+参考 `.env.example`：
+
+- `PORT` / `BACKEND_PORT`：后端端口（默认 `8787`）
+- `DATA_DIR`：后端数据目录（默认 `./data`）
+- `CORS_ORIGIN`：跨域时允许的前端域名（可留空）
+- `VITE_QWEN_*`：前端大模型调用配置
+- `VITE_PHONE_CHECK_ENDPOINT`：手机号查重接口（默认 `/api/participants/check-phone`）
+
+## 6. 历史手机号导入
+
+从旧的 `jsonl` 中提取 `demographics.phone` 并写入去重库：
+
+```bash
+npm run import:phones -- "d:\\Downloads\\S2W3exp.jsonl"
+```
+
+## 7. 当前后端接口
+
+- `GET /api/health`
+- `GET /api/participants/check-phone?phone=11位手机号`
+- `POST /api/submit`
+- `POST /api/final-submit`
+
+`/api/submit` 在接收 `pageId=consent` 时会自动把手机号写入去重库。
