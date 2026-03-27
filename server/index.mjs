@@ -15,6 +15,8 @@ const DATA_DIR = path.resolve(process.env.DATA_DIR ?? path.join(PROJECT_ROOT, "d
 const PHONE_REGISTRY_FILE = path.join(DATA_DIR, "registered-phones.json");
 const SUBMISSION_LOG_FILE = path.join(DATA_DIR, "submissions.jsonl");
 const FINAL_SUBMISSION_LOG_FILE = path.join(DATA_DIR, "final-submissions.jsonl");
+const DEFAULT_QWEN_ENDPOINT =
+  "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
 
 function ensureDataFiles() {
   if (!fs.existsSync(DATA_DIR)) {
@@ -103,6 +105,16 @@ function sendJson(res, statusCode, payload) {
   res.status(statusCode).json(payload);
 }
 
+function getQwenApiConfig() {
+  const apiKey = process.env.QWEN_API_KEY ?? process.env.VITE_QWEN_API_KEY ?? "";
+  const endpoint =
+    process.env.QWEN_API_ENDPOINT ??
+    process.env.VITE_QWEN_API_ENDPOINT ??
+    DEFAULT_QWEN_ENDPOINT;
+  const defaultModel = process.env.QWEN_MODEL ?? process.env.VITE_QWEN_MODEL ?? "qwen-plus";
+  return { apiKey, endpoint, defaultModel };
+}
+
 ensureDataFiles();
 
 if (CORS_ORIGIN) {
@@ -176,6 +188,62 @@ app.post("/api/final-submit", (req, res) => {
     sendJson(res, 400, {
       ok: false,
       error: error instanceof Error ? error.message : "invalid-request",
+    });
+  }
+});
+
+app.post("/api/chat/completions", async (req, res) => {
+  try {
+    const { apiKey, endpoint, defaultModel } = getQwenApiConfig();
+    if (!apiKey) {
+      sendJson(res, 500, { ok: false, error: "QWEN_API_KEY missing on server" });
+      return;
+    }
+
+    const body = req.body ?? {};
+    const messages = Array.isArray(body.messages) ? body.messages : [];
+    const model = typeof body.model === "string" && body.model ? body.model : defaultModel;
+    const temperature =
+      typeof body.temperature === "number" ? body.temperature : 0.7;
+    const maxTokens =
+      typeof body.max_tokens === "number" ? body.max_tokens : 500;
+
+    const qwenResponse = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model,
+        messages,
+        stream: false,
+        temperature,
+        max_tokens: maxTokens,
+      }),
+    });
+
+    if (!qwenResponse.ok) {
+      const raw = await qwenResponse.text();
+      sendJson(res, qwenResponse.status, {
+        ok: false,
+        error: "qwen-request-failed",
+        detail: raw.slice(0, 500),
+      });
+      return;
+    }
+
+    const payload = (await qwenResponse.json()) ?? {};
+    const text =
+      payload?.choices?.[0]?.message?.content ??
+      payload?.output?.text ??
+      "";
+
+    sendJson(res, 200, { text: String(text ?? "") });
+  } catch (error) {
+    sendJson(res, 500, {
+      ok: false,
+      error: error instanceof Error ? error.message : "chat-completion-failed",
     });
   }
 });

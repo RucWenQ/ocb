@@ -48,7 +48,8 @@ npm run start
 - `PORT` / `BACKEND_PORT`：后端端口（默认 `8787`）
 - `DATA_DIR`：后端数据目录（默认 `./data`）
 - `CORS_ORIGIN`：跨域时允许的前端域名（可留空）
-- `VITE_QWEN_*`：前端大模型调用配置
+- `QWEN_*`：后端大模型调用配置（生产推荐）
+- `VITE_QWEN_*`：兼容旧配置（后端会自动兜底读取）
 - `VITE_PHONE_CHECK_ENDPOINT`：手机号查重接口（默认 `/api/participants/check-phone`）
 
 ## 6. 历史手机号导入
