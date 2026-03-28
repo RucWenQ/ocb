@@ -36,8 +36,8 @@ export default function MoralIdentityPage() {
 
     setInvalidIds([])
     await submitData('measure-moral-identity', scale)
-    setCurrentPage(11)
-    navigate('/debrief')
+    setCurrentPage(12)
+    navigate('/measure/moral-credit')
   }
 
   return (

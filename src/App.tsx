@@ -5,6 +5,9 @@ import BriefingPage from './pages/BriefingPage'
 import ChatPage from './pages/ChatPage'
 import ConsentPage from './pages/ConsentPage'
 import DebriefPage from './pages/DebriefPage'
+import FillerScalePage from './pages/FillerScalePage'
+import ManipCheckPage from './pages/ManipCheckPage'
+import MoralCreditPage from './pages/MoralCreditPage'
 import MoralDisengagementPage from './pages/MoralDisengagementPage'
 import MoralIdentityPage from './pages/MoralIdentityPage'
 import OCBScenarioPage from './pages/OCBScenarioPage'
@@ -60,11 +63,14 @@ export default function App() {
             <Route path="/ai-editor" element={<AIEditorPage />} />
             <Route path="/chat" element={<ChatPage />} />
             <Route path="/receipt" element={<ReceiptPage />} />
+            <Route path="/measure/filler-scale" element={<FillerScalePage />} />
             <Route path="/measure/ocb-scenarios" element={<OCBScenarioPage />} />
             <Route path="/measure/shopping-task" element={<ShoppingTaskPage />} />
             <Route path="/measure/peb-scale" element={<PEBScalePage />} />
             <Route path="/measure/moral-disengagement" element={<MoralDisengagementPage />} />
             <Route path="/measure/moral-identity" element={<MoralIdentityPage />} />
+            <Route path="/measure/moral-credit" element={<MoralCreditPage />} />
+            <Route path="/measure/manip-check" element={<ManipCheckPage />} />
             <Route path="/debrief" element={<DebriefPage />} />
           </Route>
         </Route>

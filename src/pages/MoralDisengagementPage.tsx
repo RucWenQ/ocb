@@ -36,7 +36,7 @@ export default function MoralDisengagementPage() {
 
     setInvalidIds([])
     await submitData('measure-moral-disengagement', scale)
-    setCurrentPage(10)
+    setCurrentPage(11)
     navigate('/measure/moral-identity')
   }
 

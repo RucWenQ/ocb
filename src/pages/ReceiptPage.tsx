@@ -103,7 +103,7 @@ export default function ReceiptPage() {
     });
 
     setCurrentPage(6);
-    navigate("/measure/ocb-scenarios");
+    navigate("/measure/filler-scale");
   };
 
   return (

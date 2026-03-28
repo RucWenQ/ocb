@@ -32,7 +32,7 @@ export default function ShoppingTaskPage() {
   const handleConfirm = async () => {
     if (!allSelected) return
     await submitData('measure-shopping-task', shoppingChoices)
-    setCurrentPage(8)
+    setCurrentPage(9)
     navigate('/measure/peb-scale')
   }
 

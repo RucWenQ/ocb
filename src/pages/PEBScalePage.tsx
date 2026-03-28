@@ -30,7 +30,7 @@ export default function PEBScalePage() {
 
     setInvalidIds([])
     await submitData('measure-peb-scale', pebScale)
-    setCurrentPage(9)
+    setCurrentPage(10)
     navigate('/measure/moral-disengagement')
   }
 

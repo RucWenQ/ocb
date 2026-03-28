@@ -94,7 +94,7 @@ export default function OCBScenarioPage() {
 
     setInvalidMap(emptyInvalidMap)
     await submitData('measure-ocb-scenarios', ocbScenariosState)
-    setCurrentPage(7)
+    setCurrentPage(8)
     navigate('/measure/shopping-task')
   }
 
