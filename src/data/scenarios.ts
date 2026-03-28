@@ -71,7 +71,7 @@ export const ocbScenarios: ScenarioItem[] = [
       {
         id: "s2_E",
         optionKey: "optE",
-        text: "做事风格题：请在本题选择“完全不可能”。",
+        text: "请选择“2”。",
       },
     ],
   },
