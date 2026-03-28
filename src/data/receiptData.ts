@@ -329,7 +329,7 @@ const controlSpecMap: Record<ReceiptItemId, { spec: string }> = {
   a4_paper: { spec: "亚太森博 办公复印纸 500张每包" },
   whiteboard_pen: { spec: "晨光 会议白板笔" },
   gel_pen: { spec: "晨光 办公中性笔 0.5mm" },
-  sticky_note: { spec: "得力 便签本 76乘76mm" },
+  sticky_note: { spec: "得力 便签本 76*76mm" },
   zipper_bag: { spec: "得力 拉链文件袋 A4" },
   color_paper: { spec: "亚太森博 彩色打印纸 A4 100张每包" },
   color_toner: { spec: "惠普 适配型彩印墨粉" },
