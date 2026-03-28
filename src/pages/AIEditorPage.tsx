@@ -2,7 +2,6 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import AvatarGrid from "../components/AvatarGrid";
-import { useDataSubmit } from "../hooks/useDataSubmit";
 import { usePageTimer } from "../hooks/usePageTimer";
 import { useExperimentStore } from "../store/experimentStore";
 import type { Personality } from "../types/experiment";
@@ -32,7 +31,6 @@ export default function AIEditorPage() {
   usePageTimer("ai-editor");
 
   const navigate = useNavigate();
-  const submitData = useDataSubmit();
   const aiConfig = useExperimentStore((state) => state.aiConfig);
   const updateAIConfig = useExperimentStore((state) => state.updateAIConfig);
   const setCurrentPage = useExperimentStore((state) => state.setCurrentPage);
@@ -64,8 +62,6 @@ export default function AIEditorPage() {
     };
 
     updateAIConfig(payload);
-    await submitData("ai-editor", payload);
-
     setCurrentPage(4);
     navigate("/chat");
   };

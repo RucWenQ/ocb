@@ -4,7 +4,6 @@ import ChatBubble from "../components/ChatBubble";
 import ChatInput from "../components/ChatInput";
 import { AVATAR_OPTIONS } from "../data/avatarOptions";
 import { departmentNeeds, purchaseBrief } from "../data/purchaseBrief";
-import { useDataSubmit } from "../hooks/useDataSubmit";
 import { usePageTimer } from "../hooks/usePageTimer";
 import { useExperimentStore } from "../store/experimentStore";
 import { buildSystemPrompt } from "../services/chatPrompts";
@@ -51,7 +50,6 @@ export default function ChatPage() {
   usePageTimer("chat");
 
   const navigate = useNavigate();
-  const submitData = useDataSubmit();
   const aiConfig = useExperimentStore((state) => state.aiConfig);
   const condition = useExperimentStore((state) => state.condition ?? "control");
   const chatHistory = useExperimentStore((state) => state.chatHistory);
@@ -277,12 +275,6 @@ export default function ChatPage() {
   };
 
   const handleToReceipt = async () => {
-    await submitData("chat", {
-      userTurns,
-      endedByUser: true,
-      messages: messages.filter((msg) => msg.role !== "system"),
-    });
-
     setCurrentPage(5);
     navigate("/receipt");
   };

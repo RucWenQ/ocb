@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LikertScale from '../components/LikertScale'
 import { fillerItems } from '../data/scales/fillerScale'
-import { useDataSubmit } from '../hooks/useDataSubmit'
 import { usePageTimer } from '../hooks/usePageTimer'
 import { useExperimentStore } from '../store/experimentStore'
 
@@ -23,7 +22,6 @@ export default function FillerScalePage() {
   usePageTimer('fillerScale')
 
   const navigate = useNavigate()
-  const submitData = useDataSubmit()
   const saved = useExperimentStore((state) => state.dvResponses.fillerScale as FillerScaleState | undefined)
   const saveDVResponse = useExperimentStore((state) => state.saveDVResponse)
   const setCurrentPage = useExperimentStore((state) => state.setCurrentPage)
@@ -40,7 +38,6 @@ export default function FillerScalePage() {
 
     setInvalidIds([])
     saveDVResponse('fillerScale', values)
-    await submitData('measure-filler-scale', values)
     setCurrentPage(7)
     navigate('/measure/ocb-scenarios')
   }

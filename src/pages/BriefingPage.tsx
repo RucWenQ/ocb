@@ -5,7 +5,6 @@ import {
   purchaseBrief,
   scenarioParagraphs,
 } from "../data/purchaseBrief";
-import { useDataSubmit } from "../hooks/useDataSubmit";
 import { usePageTimer } from "../hooks/usePageTimer";
 import { useExperimentStore } from "../store/experimentStore";
 
@@ -13,14 +12,12 @@ export default function BriefingPage() {
   usePageTimer("briefing");
 
   const navigate = useNavigate();
-  const submitData = useDataSubmit();
   const setCurrentPage = useExperimentStore((state) => state.setCurrentPage);
   const [openedDeptIds, setOpenedDeptIds] = useState<string[]>(() =>
     departmentNeeds.map((dept) => dept.id),
   );
 
   const handleNext = async () => {
-    await submitData("briefing", { acknowledged: true });
     setCurrentPage(3);
     navigate("/ai-editor");
   };

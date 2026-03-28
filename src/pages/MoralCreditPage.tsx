@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LikertScale from '../components/LikertScale'
 import { injectAiNickname, moralCreditItems } from '../data/scales/moralCreditScale'
-import { useDataSubmit } from '../hooks/useDataSubmit'
 import { usePageTimer } from '../hooks/usePageTimer'
 import { useExperimentStore } from '../store/experimentStore'
 
@@ -20,7 +19,6 @@ export default function MoralCreditPage() {
   usePageTimer('moralCredit')
 
   const navigate = useNavigate()
-  const submitData = useDataSubmit()
   const aiNickname = useExperimentStore((state) => state.aiConfig.nickname || 'AI助理')
   const saved = useExperimentStore((state) => state.dvResponses.moralCredit as MoralCreditState | undefined)
   const saveDVResponse = useExperimentStore((state) => state.saveDVResponse)
@@ -46,7 +44,6 @@ export default function MoralCreditPage() {
 
     setInvalidIds([])
     saveDVResponse('moralCredit', values)
-    await submitData('measure-moral-credit', values)
     setCurrentPage(13)
     navigate('/measure/manip-check')
   }

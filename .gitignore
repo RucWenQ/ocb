@@ -12,7 +12,12 @@ dist
 dist-ssr
 *.local
 .env
-.package-lock.json
+.env.*
+!*.example
+
+# Runtime data
+data/*
+!data/.gitkeep
 
 # Editor directories and files
 .vscode/*

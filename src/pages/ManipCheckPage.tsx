@@ -4,7 +4,6 @@ import {
   manipCheckCore,
   manipMeetingTypeQuestion,
 } from "../data/scales/manipulationCheck";
-import { useDataSubmit } from "../hooks/useDataSubmit";
 import { usePageTimer } from "../hooks/usePageTimer";
 import { useExperimentStore } from "../store/experimentStore";
 import { RatingButtons } from "../components/LikertScale";
@@ -25,7 +24,6 @@ export default function ManipCheckPage() {
   usePageTimer("manipCheck");
 
   const navigate = useNavigate();
-  const submitData = useDataSubmit();
   const saved = useExperimentStore(
     (state) => state.dvResponses.manipCheck as ManipCheckState | undefined,
   );
@@ -50,7 +48,6 @@ export default function ManipCheckPage() {
     setShowError(false);
     const payload: Record<string, unknown> = { ...values };
     saveDVResponse("manipCheck", payload);
-    await submitData("measure-manip-check", payload);
     setCurrentPage(14);
     navigate("/debrief");
   };

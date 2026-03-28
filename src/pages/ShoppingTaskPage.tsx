@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ProductCard from '../components/ProductCard'
 import { shoppingCategories } from '../data/shoppingData'
-import { useDataSubmit } from '../hooks/useDataSubmit'
 import { usePageTimer } from '../hooks/usePageTimer'
 import { useExperimentStore } from '../store/experimentStore'
 import type { ShoppingCategoryKey } from '../types/experiment'
@@ -12,7 +11,6 @@ export default function ShoppingTaskPage() {
   usePageTimer('shoppingTask')
 
   const navigate = useNavigate()
-  const submitData = useDataSubmit()
   const participantId = useExperimentStore((state) => state.participantId)
   const shoppingChoices = useExperimentStore((state) => state.shoppingChoices)
   const setShoppingChoice = useExperimentStore((state) => state.setShoppingChoice)
@@ -31,7 +29,6 @@ export default function ShoppingTaskPage() {
 
   const handleConfirm = async () => {
     if (!allSelected) return
-    await submitData('measure-shopping-task', shoppingChoices)
     setCurrentPage(9)
     navigate('/measure/peb-scale')
   }

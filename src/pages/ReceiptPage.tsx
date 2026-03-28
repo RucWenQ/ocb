@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AVATAR_OPTIONS } from "../data/avatarOptions";
 import { receiptDataByCondition } from "../data/receiptData";
-import { useDataSubmit } from "../hooks/useDataSubmit";
 import { usePageTimer } from "../hooks/usePageTimer";
 import { useExperimentStore } from "../store/experimentStore";
 
@@ -33,7 +32,6 @@ function createReceiptNo(): string {
 
 export default function ReceiptPage() {
   const navigate = useNavigate();
-  const submitData = useDataSubmit();
   const condition = useExperimentStore((state) => state.condition ?? "control");
   const aiConfig = useExperimentStore((state) => state.aiConfig);
   const setCurrentPage = useExperimentStore((state) => state.setCurrentPage);
@@ -93,14 +91,6 @@ export default function ReceiptPage() {
   const handleNext = async () => {
     const duration = getDurationSeconds();
     setReceiptInfo(true, duration);
-
-    await submitData("receipt", {
-      condition,
-      receiptNo,
-      duration,
-      total: totalAmount,
-      remaining: remainingAmount,
-    });
 
     setCurrentPage(6);
     navigate("/measure/filler-scale");

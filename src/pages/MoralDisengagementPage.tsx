@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LikertScale from '../components/LikertScale'
 import { moralDisengagementItems } from '../data/scales/moralDisengagementScale'
-import { useDataSubmit } from '../hooks/useDataSubmit'
 import { usePageTimer } from '../hooks/usePageTimer'
 import { useExperimentStore } from '../store/experimentStore'
 import type { MoralDisengagementScaleState } from '../types/experiment'
@@ -12,7 +11,6 @@ export default function MoralDisengagementPage() {
   usePageTimer('moralDisengagement')
 
   const navigate = useNavigate()
-  const submitData = useDataSubmit()
   const participantId = useExperimentStore((state) => state.participantId)
   const scale = useExperimentStore((state) => state.moralDisengagementScale)
   const setScaleValue = useExperimentStore((state) => state.setMoralDisengagementValue)
@@ -35,7 +33,6 @@ export default function MoralDisengagementPage() {
     }
 
     setInvalidIds([])
-    await submitData('measure-moral-disengagement', scale)
     setCurrentPage(11)
     navigate('/measure/moral-identity')
   }

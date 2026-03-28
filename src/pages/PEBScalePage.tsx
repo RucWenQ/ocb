@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LikertScale from '../components/LikertScale'
 import { pebItems } from '../data/scales/pebScale'
-import { useDataSubmit } from '../hooks/useDataSubmit'
 import { usePageTimer } from '../hooks/usePageTimer'
 import { useExperimentStore } from '../store/experimentStore'
 import type { PebScaleState } from '../types/experiment'
@@ -11,7 +10,6 @@ export default function PEBScalePage() {
   usePageTimer('pebScale')
 
   const navigate = useNavigate()
-  const submitData = useDataSubmit()
   const pebScale = useExperimentStore((state) => state.pebScale)
   const setPebScaleValue = useExperimentStore((state) => state.setPebScaleValue)
   const setCurrentPage = useExperimentStore((state) => state.setCurrentPage)
@@ -29,7 +27,6 @@ export default function PEBScalePage() {
     }
 
     setInvalidIds([])
-    await submitData('measure-peb-scale', pebScale)
     setCurrentPage(10)
     navigate('/measure/moral-disengagement')
   }

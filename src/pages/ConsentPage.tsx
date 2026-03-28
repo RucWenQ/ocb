@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useDataSubmit } from "../hooks/useDataSubmit";
 import { usePageTimer } from "../hooks/usePageTimer";
 import { useExperimentStore } from "../store/experimentStore";
 import { assignCondition } from "../utils/randomize";
@@ -78,11 +77,9 @@ export default function ConsentPage() {
 
   const navigate = useNavigate();
   const location = useLocation();
-  const submitData = useDataSubmit();
-  const initializeParticipant = useExperimentStore(
-    (state) => state.initializeParticipant,
+  const beginParticipantSession = useExperimentStore(
+    (state) => state.beginParticipantSession,
   );
-  const setCondition = useExperimentStore((state) => state.setCondition);
   const setCurrentPage = useExperimentStore((state) => state.setCurrentPage);
   const setConsentData = useExperimentStore((state) => state.setConsentData);
   const demographicsFromStore = useExperimentStore(
@@ -136,7 +133,6 @@ export default function ConsentPage() {
         return;
       }
 
-      initializeParticipant();
       const sanitizedDemographics: Demographics = {
         ...demographics,
         phone: normalizedPhone,
@@ -147,17 +143,10 @@ export default function ConsentPage() {
       );
       const condition = assignCondition(forcedCondition);
 
-      setCondition(condition);
+      beginParticipantSession(condition);
       setConsentData({
         consentGiven: true,
         demographics: sanitizedDemographics,
-      });
-
-      await submitData("consent", {
-        consentGiven: true,
-        demographics: sanitizedDemographics,
-        forcedCondition,
-        assignedCondition: condition,
       });
       markPhoneRegisteredLocally(normalizedPhone);
       setCurrentPage(2);

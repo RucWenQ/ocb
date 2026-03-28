@@ -38,7 +38,6 @@ npm run start
 默认落盘目录：`data/`
 
 - 手机号去重库：`data/registered-phones.json`
-- 页面提交日志：`data/submissions.jsonl`
 - 最终提交日志：`data/final-submissions.jsonl`
 
 ## 5. 环境变量
@@ -64,7 +63,4 @@ npm run import:phones -- "d:\\Downloads\\S2W3exp.jsonl"
 
 - `GET /api/health`
 - `GET /api/participants/check-phone?phone=11位手机号`
-- `POST /api/submit`
 - `POST /api/final-submit`
-
-`/api/submit` 在接收 `pageId=consent` 时会自动把手机号写入去重库。

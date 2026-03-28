@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import LikertScale from '../components/LikertScale'
 import { moralIdentityItems, moralIdentityTraits } from '../data/scales/moralIdentityScale'
-import { useDataSubmit } from '../hooks/useDataSubmit'
 import { usePageTimer } from '../hooks/usePageTimer'
 import { useExperimentStore } from '../store/experimentStore'
 import type { MoralIdentityScaleState } from '../types/experiment'
@@ -12,7 +11,6 @@ export default function MoralIdentityPage() {
   usePageTimer('moralIdentity')
 
   const navigate = useNavigate()
-  const submitData = useDataSubmit()
   const participantId = useExperimentStore((state) => state.participantId)
   const scale = useExperimentStore((state) => state.moralIdentityScale)
   const setScaleValue = useExperimentStore((state) => state.setMoralIdentityValue)
@@ -35,7 +33,6 @@ export default function MoralIdentityPage() {
     }
 
     setInvalidIds([])
-    await submitData('measure-moral-identity', scale)
     setCurrentPage(12)
     navigate('/measure/moral-credit')
   }

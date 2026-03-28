@@ -13,7 +13,6 @@ const PROJECT_ROOT = process.cwd();
 const DIST_DIR = path.join(PROJECT_ROOT, "dist");
 const DATA_DIR = path.resolve(process.env.DATA_DIR ?? path.join(PROJECT_ROOT, "data"));
 const PHONE_REGISTRY_FILE = path.join(DATA_DIR, "registered-phones.json");
-const SUBMISSION_LOG_FILE = path.join(DATA_DIR, "submissions.jsonl");
 const FINAL_SUBMISSION_LOG_FILE = path.join(DATA_DIR, "final-submissions.jsonl");
 const DEFAULT_QWEN_ENDPOINT =
   "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
@@ -24,9 +23,6 @@ function ensureDataFiles() {
   }
   if (!fs.existsSync(PHONE_REGISTRY_FILE)) {
     fs.writeFileSync(PHONE_REGISTRY_FILE, "[]\n", "utf-8");
-  }
-  if (!fs.existsSync(SUBMISSION_LOG_FILE)) {
-    fs.writeFileSync(SUBMISSION_LOG_FILE, "", "utf-8");
   }
   if (!fs.existsSync(FINAL_SUBMISSION_LOG_FILE)) {
     fs.writeFileSync(FINAL_SUBMISSION_LOG_FILE, "", "utf-8");
@@ -83,17 +79,6 @@ function appendJsonl(filePath, payload) {
   fs.appendFileSync(filePath, `${JSON.stringify(payload)}\n`, "utf-8");
 }
 
-function safeExtractConsentPhone(payload) {
-  if (!payload || typeof payload !== "object") return "";
-  const maybePageId = payload.pageId;
-  if (maybePageId !== "consent") return "";
-  const data = payload.data;
-  if (!data || typeof data !== "object") return "";
-  const demographics = data.demographics;
-  if (!demographics || typeof demographics !== "object") return "";
-  return normalizePhone(demographics.phone);
-}
-
 function safeExtractAnyPhone(payload) {
   if (!payload || typeof payload !== "object") return "";
   const demographics = payload.demographics;
@@ -144,29 +129,6 @@ app.get("/api/participants/check-phone", (req, res) => {
   }
   const exists = readRegisteredPhones().includes(phone);
   sendJson(res, 200, { exists });
-});
-
-app.post("/api/submit", (req, res) => {
-  try {
-    const payload = req.body ?? {};
-    const entry = {
-      receivedAt: new Date().toISOString(),
-      ...payload,
-    };
-    appendJsonl(SUBMISSION_LOG_FILE, entry);
-
-    const consentPhone = safeExtractConsentPhone(payload);
-    if (isValidPhone(consentPhone)) {
-      addRegisteredPhone(consentPhone);
-    }
-
-    sendJson(res, 200, { ok: true });
-  } catch (error) {
-    sendJson(res, 400, {
-      ok: false,
-      error: error instanceof Error ? error.message : "invalid-request",
-    });
-  }
 });
 
 app.post("/api/final-submit", (req, res) => {

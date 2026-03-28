@@ -5,11 +5,12 @@ import { useExperimentStore } from "../store/experimentStore";
 type SubmitStatus = "submitting" | "success" | "error";
 
 export default function DebriefPage() {
-  usePageTimer("debrief");
+  const { getDurationSeconds } = usePageTimer("debrief");
 
   const participantId = useExperimentStore((state) => state.participantId);
   const condition = useExperimentStore((state) => state.condition ?? "control");
   const startTime = useExperimentStore((state) => state.startTime);
+  const consentGiven = useExperimentStore((state) => state.consentGiven);
   const demographics = useExperimentStore((state) => state.demographics);
   const aiConfig = useExperimentStore((state) => state.aiConfig);
   const chatHistory = useExperimentStore((state) => state.chatHistory);
@@ -48,11 +49,13 @@ export default function DebriefPage() {
       endTime,
       totalDuration,
       demographics: {
+        phone: demographics.phone,
         gender: demographics.gender,
         age: demographics.age,
         education: demographics.education,
         workExperience: demographics.workExperience,
       },
+      consentGiven,
       aiConfig: {
         nickname: aiConfig.nickname,
         avatarId: aiConfig.avatarId,
@@ -75,7 +78,10 @@ export default function DebriefPage() {
         manipCheck: dvResponses.manipCheck ?? null,
       },
       dvResponses,
-      pageDurations,
+      pageDurations: {
+        ...pageDurations,
+        debrief: getDurationSeconds(),
+      },
     }),
     [
       aiConfig.avatarId,
@@ -86,11 +92,14 @@ export default function DebriefPage() {
       aiConfig.personality,
       chatHistory,
       condition,
+      consentGiven,
       demographics.age,
       demographics.education,
       demographics.gender,
+      demographics.phone,
       demographics.workExperience,
       endTime,
+      getDurationSeconds,
       moralDisengagementScale,
       moralIdentityScale,
       ocbScenarios,

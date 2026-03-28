@@ -42,8 +42,7 @@ interface ExperimentState {
   dvResponses: Record<string, unknown>
   pageDurations: Record<string, number>
 
-  initializeParticipant: () => void
-  setCondition: (condition: Condition) => void
+  beginParticipantSession: (condition: Condition) => void
   setCurrentPage: (page: number) => void
   setConsentData: (payload: { consentGiven: boolean; demographics: Demographics }) => void
   updateAIConfig: (payload: Partial<AIConfig>) => void
@@ -171,19 +170,22 @@ export const useExperimentStore = create<ExperimentState>()(
       dvResponses: {},
       pageDurations: {},
 
-      initializeParticipant: () =>
+      beginParticipantSession: (condition) =>
         set((state) => {
-          if (state.participantId) return state
+          if (state.participantId) {
+            return {
+              condition,
+            }
+          }
 
           const now = new Date().toISOString()
           return {
-            ...state,
             participantId: generateParticipantId(),
             startTime: now,
+            condition,
           }
         }),
 
-      setCondition: (condition) => set({ condition }),
       setCurrentPage: (page) => set({ currentPage: page }),
 
       setConsentData: ({ consentGiven, demographics }) =>

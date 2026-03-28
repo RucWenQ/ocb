@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import ScenarioRatingCard from '../components/ScenarioRatingCard'
 import { ocbScenarios } from '../data/scenarios'
-import { useDataSubmit } from '../hooks/useDataSubmit'
 import { usePageTimer } from '../hooks/usePageTimer'
 import { useExperimentStore } from '../store/experimentStore'
 import type { OcbScenarioKey } from '../types/experiment'
@@ -24,7 +23,6 @@ export default function OCBScenarioPage() {
   usePageTimer('ocbScenarios')
 
   const navigate = useNavigate()
-  const submitData = useDataSubmit()
   const participantId = useExperimentStore((state) => state.participantId)
   const ocbScenariosState = useExperimentStore((state) => state.ocbScenarios)
   const setOcbScenarioRating = useExperimentStore((state) => state.setOcbScenarioRating)
@@ -93,7 +91,6 @@ export default function OCBScenarioPage() {
     }
 
     setInvalidMap(emptyInvalidMap)
-    await submitData('measure-ocb-scenarios', ocbScenariosState)
     setCurrentPage(8)
     navigate('/measure/shopping-task')
   }
